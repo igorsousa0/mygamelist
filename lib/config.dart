@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-//import 'package:flutter/material.dart';
 
 var bgColor = const Color.fromARGB(255, 37, 38, 43);
 var kTextColor = const Color.fromARGB(255, 56, 56, 56);

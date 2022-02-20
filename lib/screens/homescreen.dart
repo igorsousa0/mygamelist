@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mygamelist/Screens/Home/Components/side_menu.dart';
 import 'package:mygamelist/screens/center/center_screen.dart';
 
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
