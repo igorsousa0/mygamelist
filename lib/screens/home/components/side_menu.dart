@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mygamelist/config.dart';
 
 class SideMenu extends StatelessWidget {
   const SideMenu({Key? key}) : super(key: key);
@@ -10,11 +11,10 @@ class SideMenu extends StatelessWidget {
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
-            //child: Image.asset('assets/img/logo.png', color: Colors.white)
             child: Stack(
               children: <Widget>[
                 Align(
-                  child: Image.asset("assets/img/logo.png", color: Colors.white),
+                  child: Image.asset(logo, color: Colors.white),
                 ),
                 const Align(
                   alignment: Alignment(0, 0.9),
@@ -26,7 +26,7 @@ class SideMenu extends StatelessWidget {
           DrawListTile(
               title: "Pagina Inicial",
               press: () {},
-              pngSrc: 'assets/img/home.png'),
+              pngSrc: homeIcon),
           //DrawListTile(title: "Login", press: () {}),
         ],
       ),

@@ -11,39 +11,54 @@ class CenterScreen extends StatelessWidget {
       child: SingleChildScrollView(
           padding: const EdgeInsets.all(defaultPadding),
           child: Column(
-            children: [
-              const Header(),
-              const SizedBox(height: defaultPadding),
-              Container(
-                padding: const EdgeInsets.all(defaultPadding),
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                ),
-                child: Column(
-                  children: [
-                    const SizedBox(height: defaultPadding),
-                    GridView.builder(
-                      shrinkWrap: true,
-                      itemCount: 4,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 4,
-                        crossAxisSpacing: defaultPadding,
-                      ),
-                      itemBuilder: (context, index) => Container(
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          borderRadius:
-                              BorderRadius.all(Radius.circular(10)),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
+            children: const [
+              Padding(
+                padding: EdgeInsets.only(right: defaultPadding),
+                child: Header(),
               ),
-              const ControlPage(),
+              //Login(),
+              SizedBox(height: defaultPadding),
+              Contents(),
+              ControlPage(),
             ],
           )),
+    );
+  }
+}
+
+class Contents extends StatelessWidget {
+  const Contents({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(defaultPadding),
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(10)),
+      ),
+      child: Column(
+        children: [
+          const SizedBox(height: defaultPadding),
+          GridView.builder(
+            shrinkWrap: true,
+            itemCount: 10,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 5,
+              crossAxisSpacing: defaultPadding * 2,
+              mainAxisSpacing: defaultPadding * 2,
+            ),
+            itemBuilder: (context, index) => Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                image: DecorationImage(image: AssetImage(steamIcon)),
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
+            ),
+          )
+        ],
+      ),
     );
   }
 }
@@ -55,7 +70,7 @@ class ControlPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(     
+    return Column(
       children: [
         Row(
           children: const [

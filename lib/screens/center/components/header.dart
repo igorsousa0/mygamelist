@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
 import 'package:mygamelist/config.dart';
+import 'package:mygamelist/user.dart';
+import 'dart:convert';
 
 class Header extends StatelessWidget {
   const Header({
@@ -48,17 +52,189 @@ class FilterField extends StatelessWidget {
           Padding(
             padding: EdgeInsets.symmetric(horizontal: defaultPadding / 2),
             child: Text('Filter'),
-          )
+          ),
         ],
       ),
     );
   }
 }
 
-class ProfileCard extends StatelessWidget {
+class ProfileCard extends StatefulWidget {
   const ProfileCard({
     Key? key,
   }) : super(key: key);
+
+  @override
+  State<ProfileCard> createState() => _ProfileCardState();
+}
+
+class _ProfileCardState extends State<ProfileCard> {
+  var loginText = 'Login';
+  var login = false;
+  List<User> users = [];
+
+  @override
+  void initState() {
+    _retrieveUser();
+    super.initState();
+  }
+
+  _retrieveUser() async {
+    users = [];
+    try {
+      http.Response response = await http.get(Uri.parse(api));
+      var data = json.decode(response.body);
+      data.forEach((user) {
+        users.add(User.fromMap(user));
+      });
+    } catch (e) {
+      print('Error is $e');
+    }
+  }
+
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  Future<void> showLoginDialog(BuildContext context) async {
+    if (login == false) {
+      return await showDialog(
+        context: context,
+        builder: (context) {
+          final TextEditingController _textEditingUser =
+              TextEditingController();
+          final TextEditingController _textEditingPassword =
+              TextEditingController();
+          return AlertDialog(
+            title: const Center(child: Text('Login')),
+            content: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: defaultPadding * 0.3),
+                    TextFormField(
+                      controller: _textEditingUser,
+                      decoration: const InputDecoration(labelText: "Usuário"),
+                      validator: (String? value) {
+                        if (value != null && value.isEmpty) {
+                          return "Usuário Obrigatório";
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: defaultPadding),
+                    TextFormField(
+                      controller: _textEditingPassword,
+                      obscureText: true,
+                      decoration: const InputDecoration(labelText: "Senha"),
+                      validator: (String? value) {
+                        if (value != null && value.isEmpty) {
+                          return "Senha Obrigatório";
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: defaultPadding * 1.2),
+                  ],
+                )),
+            actions: <Widget>[
+              Container(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    TextButton(
+                      child: const Text("Cancelar"),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    TextButton(
+                      child: const Text("Cadastre-se"),
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          registerUser(
+                              _textEditingUser.text, _textEditingPassword.text);
+                          Navigator.of(context).pop();
+                        }
+                      },
+                    ),
+                    TextButton(
+                      child: const Text("Acessar"),
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          registerUser(
+                              _textEditingUser.text, _textEditingPassword.text);
+                          Navigator.of(context).pop();
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      return await showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Center(child: Text(loginText)),
+            content: Container(
+              margin: const EdgeInsets.only(right: defaultPadding),
+              padding: const EdgeInsets.symmetric(
+                horizontal: defaultPadding,
+                vertical: defaultPadding / 2,
+              ),
+              decoration: BoxDecoration(
+                  color: textFieldColor,
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
+                  border: Border.all(color: Colors.white10)),
+              child: InkWell(
+                onTap: () {
+                  logoutUser();
+                  Navigator.of(context).pop();
+                },
+                child: Row(
+                  children: const [
+                    Icon(
+                      Icons.logout,
+                      color: Colors.white54,
+                      size: 24.0,
+                      semanticLabel: 'Text to announce in accessibility modes',
+                    ),
+                    Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: defaultPadding / 2),
+                      child: Text('Logout'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: <Widget>[
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  vertical: defaultPadding / 2,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    TextButton(
+                      child: const Text("Cancelar"),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,16 +248,59 @@ class ProfileCard extends StatelessWidget {
           color: textFieldColor,
           borderRadius: const BorderRadius.all(Radius.circular(10)),
           border: Border.all(color: Colors.white10)),
-      child: Row(
-        children: [
-          Image.asset('assets/img/login.png'),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: defaultPadding / 2),
-            child: Text('Login'),
-          )
-        ],
+      child: InkWell(
+        onTap: () async {
+          await showLoginDialog(context);
+        },
+        child: Row(
+          children: [
+            Image.asset(loginIcon),
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: defaultPadding / 2),
+              child: Text('$loginText'),
+            )
+          ],
+        ),
       ),
     );
+  }
+
+  void registerUser(user, password) async {
+    http.Response response = await http.get(Uri.parse("$api/user/$user/"));
+    if (response.statusCode == 200) {
+      
+    } else {
+      http.post(Uri.parse("$api/users/create/"),
+          body: {'username': user, 'password': password});
+    }
+  }
+
+  consultUser(user) async {
+    http.Response response = await http.get(Uri.parse("$api/user/$user/"));
+    if (response.statusCode == 200) {
+      setState(() {
+        loginText = user;
+        login = true;
+      });
+      return '';
+    } else {
+      return AlertDialog(
+        title: const Text('Login'),
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: const <Widget>[Text('Usuário já existe')],
+          ),
+        ),
+      );
+    }
+  }
+
+  logoutUser() {
+    setState(() {
+      loginText = 'Login';
+      login = false;
+    });
   }
 }
 
@@ -112,7 +331,7 @@ class SearchField extends StatelessWidget {
                 borderRadius: const BorderRadius.all(Radius.circular(10)),
               ),
               child: Image.asset(
-                'assets/img/search.png',
+                searchIcon,
               ),
             ),
           )),
