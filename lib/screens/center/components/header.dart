@@ -161,7 +161,7 @@ class _ProfileCardState extends State<ProfileCard> {
                       child: const Text("Acessar"),
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
-                          registerUser(
+                          consultUser(
                               _textEditingUser.text, _textEditingPassword.text);
                           Navigator.of(context).pop();
                         }
@@ -236,6 +236,30 @@ class _ProfileCardState extends State<ProfileCard> {
     }
   }
 
+  Future<void> showErrorDialog(BuildContext context, title ,text) async {
+    return await showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Center(child: Text(title)),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children:  <Widget>[
+                  Center(child: Text(text)),
+                  const SizedBox(height: defaultPadding * 1.2),
+                  TextButton(
+                      child: const Text("Ok"),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -269,30 +293,23 @@ class _ProfileCardState extends State<ProfileCard> {
   void registerUser(user, password) async {
     http.Response response = await http.get(Uri.parse("$api/user/$user/"));
     if (response.statusCode == 200) {
-      
     } else {
       http.post(Uri.parse("$api/users/create/"),
           body: {'username': user, 'password': password});
     }
   }
 
-  consultUser(user) async {
-    http.Response response = await http.get(Uri.parse("$api/user/$user/"));
-    if (response.statusCode == 200) {
+  consultUser(user, pass) async {
+    http.Response responseUser = await http.get(Uri.parse("$api/user/$user/"));
+    http.Response responsePass = await http.get(Uri.parse("$api/pass/$pass/"));
+    if (responseUser.statusCode == 200 && responsePass.statusCode == 200) {
       setState(() {
         loginText = user;
         login = true;
       });
       return '';
     } else {
-      return AlertDialog(
-        title: const Text('Login'),
-        content: SingleChildScrollView(
-          child: ListBody(
-            children: const <Widget>[Text('Usuário já existe')],
-          ),
-        ),
-      );
+      showErrorDialog(context, 'Login' , 'Usuário ou Senha inválido');
     }
   }
 
