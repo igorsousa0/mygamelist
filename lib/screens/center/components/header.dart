@@ -142,12 +142,6 @@ class _ProfileCardState extends State<ProfileCard> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     TextButton(
-                      child: const Text("Cancelar"),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                    TextButton(
                       child: const Text("Cadastre-se"),
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
@@ -236,7 +230,7 @@ class _ProfileCardState extends State<ProfileCard> {
     }
   }
 
-  Future<void> showErrorDialog(BuildContext context, title ,text) async {
+  Future<void> showModalDialog(BuildContext context, title, text) async {
     return await showDialog(
         context: context,
         builder: (context) {
@@ -244,15 +238,15 @@ class _ProfileCardState extends State<ProfileCard> {
             title: Center(child: Text(title)),
             content: SingleChildScrollView(
               child: ListBody(
-                children:  <Widget>[
+                children: <Widget>[
                   Center(child: Text(text)),
                   const SizedBox(height: defaultPadding * 1.2),
                   TextButton(
-                      child: const Text("Ok"),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
+                    child: const Text("Ok"),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
                 ],
               ),
             ),
@@ -293,9 +287,13 @@ class _ProfileCardState extends State<ProfileCard> {
   void registerUser(user, password) async {
     http.Response response = await http.get(Uri.parse("$api/user/$user/"));
     if (response.statusCode == 200) {
+      showModalDialog(context, 'Cadastro', 'Usuário está em uso');
     } else {
-      http.post(Uri.parse("$api/users/create/"),
+      response = await http.post(Uri.parse("$api/users/create/"),
           body: {'username': user, 'password': password});
+      if (response.statusCode == 200) {
+        showModalDialog(context, 'Cadastro', 'Usuário cadastrado com sucesso!');
+      }
     }
   }
 
@@ -309,7 +307,7 @@ class _ProfileCardState extends State<ProfileCard> {
       });
       return '';
     } else {
-      showErrorDialog(context, 'Login' , 'Usuário ou Senha inválido');
+      showModalDialog(context, 'Login', 'Usuário ou Senha inválido');
     }
   }
 

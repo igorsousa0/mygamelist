@@ -3,7 +3,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 //API 
-const String api = 'http://127.0.0.1:8000';
+//const String api = 'http://127.0.0.1:8000';
+const String api = 'https://backend-my-game-list.herokuapp.com';
 
 //Colores 
 var bgColor = const Color.fromARGB(255, 37, 38, 43);
