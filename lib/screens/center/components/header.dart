@@ -298,11 +298,11 @@ class _ProfileCardState extends State<ProfileCard> {
   }
 
   consultUser(user, pass) async {
-    http.Response responseUser = await http.get(Uri.parse("$api/user/$user/"));
-    http.Response responsePass = await http.get(Uri.parse("$api/pass/$pass/"));
-    if (responseUser.statusCode == 200 && responsePass.statusCode == 200) {
+    http.Response response = await http.get(Uri.parse("$api/user/$user/"));
+    final jsonData = jsonDecode(response.body);
+    if (response.statusCode == 200 && jsonData["password"] == pass) {
       setState(() {
-        loginText = user;
+        loginText = jsonData["username"];
         login = true;
       });
       return '';

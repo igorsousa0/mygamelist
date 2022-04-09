@@ -11,24 +11,20 @@ class CenterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: Drawer(),
-      body: Container(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: EdgeInsets.only(right: defaultPadding),
-              child: Header(),
-            ),
-            //Login(),
-            SizedBox(height: defaultPadding),
-            Expanded(
-              child: Contents(),
-            ),
-            ControlPage(),
-          ],
-        ),
-      ),
+      body: SingleChildScrollView(
+          padding: const EdgeInsets.all(defaultPadding),
+          child: Column(
+            children: const [
+              Padding(
+                padding: EdgeInsets.only(right: defaultPadding),
+                child: Header(),
+              ),
+              //Login(),
+              SizedBox(height: defaultPadding),
+              Contents(),
+              ControlPage(),
+            ],
+          )),
     );
   }
 }
@@ -43,11 +39,11 @@ class Contents extends StatefulWidget {
 }
 
 class _ContentsState extends State<Contents> {
-  var Steamlenght;
-  static var jsonDataSteam;
+  var lenght = 0;
+  var jsonDataSteam;
   var jsonDataSteamDetail;
-  static var steamImages = [];
-  static var steamPrices = [];
+  var listImage = [];
+  var steamPrice;
   String jsonSteamImage = '';
 
   consultaImageSteam(index, appid) async {
@@ -82,34 +78,21 @@ class _ContentsState extends State<Contents> {
 
   Future<List<Steam>> consultarTamanhoSteam() async {
     http.Response response = await http.get(Uri.parse("$api/steam/"));
-    var jsonData = jsonDecode(response.body);
-    jsonDataSteam = jsonData;
-    /*setState(() {
-      lenght = jsonData.length;
-      jsonDataSteam = jsonData;
-    });*/
-    Steamlenght = jsonData.length;
+    final jsonData = jsonDecode(response.body);
     List<Steam> steams = [];
-    List<String> steamDetail;
-    for (var i in jsonData) {
-      //print(i["appid"]);
-      var SteamAppid = i["appid"];
-      //print(SteamAppid);
+    for (var u in jsonData) {
+      print(u("appid"));
+      /*var SteamAppid = u("appid");
       http.Response responseSteam =
           await http.get(Uri.parse("$apiSteam$SteamAppid"));
       final jsonDataDetail = jsonDecode(responseSteam.body);
-      var steamImage = jsonDataDetail["$SteamAppid"]["data"]["header_image"];
-      var steamPrice = jsonDataDetail["$SteamAppid"]["data"]["price_overview"];
-      steamImages.add(steamImage);
-      steamPrices.add(steamPrice);
-      /*Steam steam = Steam(
+      Steam steam = Steam(
         SteamAppid,
-        steamImage,
-        steamPrice,
+        jsonDataDetail['$SteamAppid']['data']['header_image'],
+        jsonDataDetail['$SteamAppid']['data']['price_overview']
+            ['final_formatted'],
       );*/
-      /*setState(() {
-        steamImages.add(steamImage);
-      });*/
+      //steams.add(steam);
     }
     //print(steams.length);
     return steams;
@@ -120,7 +103,7 @@ class _ContentsState extends State<Contents> {
     consultaSteam(1);*/
   }
 
-  /*consultaSteam(index) async {
+  consultaSteam(index) async {
     while (index < lenght) {
       http.Response response = await http.get(Uri.parse("$api/steam/$index"));
       if (response.statusCode == 200) {
@@ -131,7 +114,7 @@ class _ContentsState extends State<Contents> {
       }
     }
     print(listImage);
-  }*/
+  }
 
   consultarInfoSteam(appid) async {
     http.Response response = await http.get(Uri.parse("$apiSteam$appid"));
@@ -144,27 +127,33 @@ class _ContentsState extends State<Contents> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: FutureBuilder(
-          future: consultarTamanhoSteam(),
-          builder: (context, AsyncSnapshot snapshot) {
-            if (snapshot.data == null) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            } else {
-              if (snapshot.hasError) {
+   return Scaffold(
+        body: FutureBuilder(
+            future: consultarTamanhoSteam(),
+            builder: (context, AsyncSnapshot snapshot) {
+              if (snapshot.data == null) {
                 return const Center(
-                  child: Text('Algum error ocorreu'),
+                  child: CircularProgressIndicator(),
                 );
               } else {
-                return BuildSteam(); //BuildSteam();
+                if (snapshot.hasError) {
+                  return const Center(
+                    child: Text('Algum error ocorreu'),
+                  );
+                } else {
+                  return const Center(
+                      child: Text(
+                    'Rodando',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 30,
+                    ),
+                  )); //BuildSteam();
+                }
               }
-            }
-          }),
-    );
+            }),
+      );
   }
-
   Widget BuildSteam() {
     return Container(
       padding: const EdgeInsets.all(defaultPadding),
@@ -174,29 +163,27 @@ class _ContentsState extends State<Contents> {
       child: Column(
         children: [
           const SizedBox(height: defaultPadding),
-          Expanded(
-            child: GridView.builder(
-              controller: ScrollController(),
-              shrinkWrap: true,
-              itemCount: Steamlenght,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 5,
-                crossAxisSpacing: defaultPadding * 2,
-                mainAxisSpacing: defaultPadding * 2,
-              ),
-              itemBuilder: (context, index) => Container(
-                child: Column(
-                  children: [
-                    Image.network(steamImages[index]),
-                    Text(
-                      jsonDataSteam[index]["name"],
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 11,
-                      ),
+          GridView.builder(
+            controller: ScrollController(),
+            shrinkWrap: true,
+            itemCount: 10,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 5,
+              crossAxisSpacing: defaultPadding * 2,
+              mainAxisSpacing: defaultPadding * 2,
+            ),
+            itemBuilder: (context, index) => Container(
+              child: Column(
+                children: [
+                  //Image.network(listImage[index]),
+                  Text(
+                    'Teste',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 11,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
