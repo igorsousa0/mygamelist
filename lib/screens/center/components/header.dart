@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import 'package:mygamelist/config.dart';
+import 'package:mygamelist/responsive.dart';
 import 'package:mygamelist/user.dart';
 import 'dart:convert';
 
@@ -12,46 +13,66 @@ class Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Text('Pagina Inicial', style: Theme.of(context).textTheme.headline6),
-        const Spacer(flex: 2),
-        const FilterField(),
-        const Expanded(child: SearchField()),
-        const ProfileCard(),
-      ],
-    );
-  }
-}
-
-class FilterField extends StatelessWidget {
-  const FilterField({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(right: defaultPadding),
-      padding: const EdgeInsets.symmetric(
-        horizontal: defaultPadding,
-        vertical: defaultPadding / 2,
-      ),
-      decoration: BoxDecoration(
-          color: textFieldColor,
-          borderRadius: const BorderRadius.all(Radius.circular(10)),
-          border: Border.all(color: Colors.white10)),
-      child: Row(
-        children: const [
-          Icon(
-            Icons.filter_alt_outlined,
-            color: Colors.white54,
-            size: 24.0,
-            semanticLabel: 'Text to announce in accessibility modes',
-          ),
+    return Responsive(
+      mobile: Row(
+        children: [
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: defaultPadding / 2),
-            child: Text('Filter'),
+            padding: const EdgeInsets.only(
+                top: defaultPadding, left: defaultPadding),
+            child: Text('Pagina Inicial',
+                style: DefaultTextStyle.of(context)
+                    .style
+                    .apply(fontSizeFactor: 1.4)),
+          ),
+          const Spacer(flex: 1),
+          const Expanded(
+              child: Padding(
+            padding: const EdgeInsets.only(top: defaultPadding),
+            child: SearchField(),
+          )),
+          Padding(
+            padding: const EdgeInsets.only(top: defaultPadding),
+            child: const ProfileCard(),
+          ),
+        ],
+      ),
+      tablet: Row(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(
+                top: defaultPadding, left: defaultPadding),
+            child: Text('Pagina Inicial',
+                style: Theme.of(context).textTheme.headline6),
+          ),
+          const Spacer(flex: 1),
+          const Expanded(
+              child: Padding(
+            padding: const EdgeInsets.only(top: defaultPadding),
+            child: SearchField(),
+          )),
+          Padding(
+            padding: const EdgeInsets.only(top: defaultPadding),
+            child: const ProfileCard(),
+          ),
+        ],
+      ),
+      desktop: Row(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(
+                top: defaultPadding, left: defaultPadding),
+            child: Text('Pagina Inicial',
+                style: Theme.of(context).textTheme.headline6),
+          ),
+          const Spacer(flex: 2),
+          const Expanded(
+              child: Padding(
+            padding: const EdgeInsets.only(top: defaultPadding),
+            child: SearchField(),
+          )),
+          Padding(
+            padding: const EdgeInsets.only(top: defaultPadding),
+            child: const ProfileCard(),
           ),
         ],
       ),
@@ -299,13 +320,16 @@ class _ProfileCardState extends State<ProfileCard> {
 
   consultUser(user, pass) async {
     http.Response response = await http.get(Uri.parse("$api/user/$user/"));
-    final jsonData = jsonDecode(response.body);
-    if (response.statusCode == 200 && jsonData["password"] == pass) {
-      setState(() {
-        loginText = jsonData["username"];
-        login = true;
-      });
-      return '';
+    if (response.statusCode == 200) {
+      final jsonData = jsonDecode(response.body);
+      if (jsonData["password"] == pass) {
+        setState(() {
+          loginText = jsonData["username"];
+          login = true;
+        });
+      } else {
+        showModalDialog(context, 'Login', 'Usuário ou Senha inválido');
+      }
     } else {
       showModalDialog(context, 'Login', 'Usuário ou Senha inválido');
     }

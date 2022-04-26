@@ -1,5 +1,3 @@
-import 'package:meta/meta.dart';
-
 class Steam {
   final String appid;
   final String image;
