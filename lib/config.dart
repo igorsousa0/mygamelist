@@ -2,14 +2,19 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-//API 
+//API
 const String api = 'http://127.0.0.1:8000';
 //const String api = 'https://backend-my-game-list.herokuapp.com';
-const String apiSteam = 'https://mycorssite.herokuapp.com/https://store.steampowered.com/api/appdetails?appids=';
-const String apiGOG = 'https://mycorssite.herokuapp.com/https://api.gog.com/v2/games/';
-const String apiGOGPrice = 'https://mycorssite.herokuapp.com/https://api.gog.com/products/';
+const String apiSteam =
+    'https://mycorssite.herokuapp.com/https://store.steampowered.com/api/appdetails?appids=';
+const String apiGOG =
+    'https://mycorssite.herokuapp.com/https://api.gog.com/v2/games/';
+const String apiGOGPrice =
+    'https://mycorssite.herokuapp.com/https://api.gog.com/products/';
+const String apiMetacritic =
+    'https://mycorssite.herokuapp.com/http://www.metacritic.com/game/pc';
 
-//Colores 
+//Colores
 var bgColor = const Color.fromARGB(255, 37, 38, 43);
 var kTextColor = const Color.fromARGB(255, 56, 56, 56);
 var textFieldColor = const Color(0xFF2A2D3E);

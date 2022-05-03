@@ -21,6 +21,7 @@ class CenterPage extends StatelessWidget {
   var gogAppid;
   var gogPrice;
   var jsonDataGOG;
+  var screenshots = [];
   CenterPage({
     Key? key,
     //required this.indexGame,
@@ -44,13 +45,20 @@ class CenterPage extends StatelessWidget {
                   child: Text('Algum error ocorreu'),
                 );
               } else {
-                return GameDetailCard(
-                    steamPrice: steamPrice,
-                    imageGame: imageGame,
-                    steamAppid: steamAppid,
-                    gogPrice: gogPrice,
-                    gogAppid: gogAppid,
-                    jsonDataGOG: jsonDataGOG);
+                return Column(children: [
+                  Container(
+                    child: Expanded(
+                      child: GameDetailCard(
+                          steamPrice: steamPrice,
+                          imageGame: imageGame,
+                          steamAppid: steamAppid,
+                          gogPrice: gogPrice,
+                          gogAppid: gogAppid,
+                          jsonDataGOG: jsonDataGOG,
+                          screenshots: screenshots),
+                    ),
+                  ),
+                ]);
               }
             }
           }),
@@ -65,13 +73,15 @@ class CenterPage extends StatelessWidget {
     http.Response responseGOGPrice = await http
         .get(Uri.parse("$apiGOGPrice$gogAppid/prices?countryCode=BR"));
     final jsonDataPriceGOG = jsonDecode(responseGOGPrice.body);
-    http.Response responseGOGDetail = await http
-        .get(Uri.parse("$apiGOG$gogAppid"));
+    http.Response responseGOGDetail =
+        await http.get(Uri.parse("$apiGOG$gogAppid"));
     final jsonDataApiGOG = jsonDecode(responseGOGDetail.body);
     jsonDataGOG = jsonDataApiGOG;
     imageGame = jsonDataDetail["$steamAppid"]["data"]["header_image"];
     steamPrice = jsonDataDetail["$steamAppid"]["data"]["price_overview"]
         ["final_formatted"];
+    screenshots = jsonDataDetail["$steamAppid"]["data"]["screenshots"];
+    //print(screenshots[0]["id"]);
     gogPrice = jsonDataPriceGOG["_embedded"]["prices"][0]["finalPrice"];
     if (gogPrice != null && gogPrice.length > 0) {
       gogPrice = gogPrice.substring(0, gogPrice.length - 4);
@@ -80,7 +90,16 @@ class CenterPage extends StatelessWidget {
     var format = NumberFormat.simpleCurrency(locale: 'pt_BR');
     steamPrice = steamPrice.substring(3, steamPrice.length);
     steamPrice = "${format.currencySymbol}" + steamPrice;
-    gogPrice = "${format.currencySymbol}" + currencyFormatter.format(int.parse(gogPrice)/100);
+    gogPrice = "${format.currencySymbol}" +
+        currencyFormatter.format(int.parse(gogPrice) / 100);
+    // Estruturação no nome para uso da API Metacritic
+    /*String nameTest = nameGame;
+    nameTest = nameTest.replaceAll('  ', ' ');
+    nameTest = nameTest.replaceAll(' - ', '-');
+    nameTest = nameTest.replaceAll(':', '');
+    nameTest = nameTest.replaceAll(' ', '-');
+    //print(nameTest.replaceAll(' ', '-'));
+    print(nameTest);*/
     /*steamPrices.add(jsonDataDetail["$SteamAppid"]["data"]["price_overview"]["final_formatted"]);
       steamAppids.add(SteamAppid);*/
     /*Steam steam = Steam(
@@ -122,6 +141,7 @@ class GameDetailCard extends StatelessWidget {
     required this.gogAppid,
     required this.gogPrice,
     required this.jsonDataGOG,
+    required this.screenshots,
   }) : super(key: key);
 
   var steamPrice;
@@ -130,52 +150,174 @@ class GameDetailCard extends StatelessWidget {
   var gogPrice;
   var gogAppid;
   var jsonDataGOG;
+  var screenshots = [];
 
   @override
   Widget build(BuildContext context) {
     return Responsive(
-      mobile: Container(),
-      tablet: Container(),
-      desktop: Container(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(height: defaultPadding),
-            Expanded(
-              child: Row(
-                children: [
-                  const SizedBox(height: defaultPadding),
-                  Expanded(
-                    child: ListView(
-                      children: [
-                        CustomListItem(
-                          user: 'Genero',
-                          price: steamPrice,
-                          thumbnail: Image.network(imageGame),
-                          title: 'Steam',
-                          icon: steamIcon,
-                          appid: steamAppid,
-                          steam: true,
-                          jsonDataGOG: '',
+      desktop: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(height: defaultPadding),
+          Expanded(
+            child: Row(
+              children: [
+                const SizedBox(height: defaultPadding),
+                Expanded(
+                  child: ListView(
+                    controller: ScrollController(),
+                    children: [
+                      CustomListItem(
+                        user: 'Genero',
+                        price: steamPrice,
+                        thumbnail: Image.network(imageGame),
+                        title: 'Steam',
+                        icon: steamIcon,
+                        appid: steamAppid,
+                        steam: true,
+                        jsonDataGOG: '',
+                      ),
+                      CustomListItem(
+                        user: 'Genero',
+                        price: gogPrice,
+                        thumbnail: Image.network(imageGame),
+                        title: 'GOG',
+                        icon: gogIcon,
+                        appid: gogAppid,
+                        steam: false,
+                        jsonDataGOG: jsonDataGOG,
+                      ),
+                      GridView.builder(
+                        controller: ScrollController(),
+                        shrinkWrap: true,
+                        itemCount: 4,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 4,
+                          crossAxisSpacing: defaultPadding * 2,
+                          mainAxisSpacing: defaultPadding,
                         ),
-                        CustomListItem(
-                          user: 'Genero',
-                          price: gogPrice,
-                          thumbnail: Image.network(imageGame),
-                          title: 'GOG',
-                          icon: gogIcon,
-                          appid: gogAppid,
-                          steam: false,
-                          jsonDataGOG: jsonDataGOG,
-                        )
-                      ],
-                    ),
+                        itemBuilder: (context, index) => Image.network(
+                          screenshots[index]["path_thumbnail"],
+                          height: 150,
+                          width: 150,
+                        ),
+                      )
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
+      tablet: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(height: defaultPadding),
+          Expanded(
+            child: Row(
+              children: [
+                const SizedBox(height: defaultPadding),
+                Expanded(
+                  child: ListView(
+                    controller: ScrollController(),
+                    children: [
+                      CustomListItem(
+                        user: 'Genero',
+                        price: steamPrice,
+                        thumbnail: Image.network(imageGame),
+                        title: 'Steam',
+                        icon: steamIcon,
+                        appid: steamAppid,
+                        steam: true,
+                        jsonDataGOG: '',
+                      ),
+                      CustomListItem(
+                        user: 'Genero',
+                        price: gogPrice,
+                        thumbnail: Image.network(imageGame),
+                        title: 'GOG',
+                        icon: gogIcon,
+                        appid: gogAppid,
+                        steam: false,
+                        jsonDataGOG: jsonDataGOG,
+                      ),
+                      GridView.builder(
+                        controller: ScrollController(),
+                        shrinkWrap: true,
+                        itemCount: 4,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 4,
+                          crossAxisSpacing: defaultPadding * 2,
+                          mainAxisSpacing: defaultPadding,
+                        ),
+                        itemBuilder: (context, index) => Image.network(
+                          screenshots[index]["path_thumbnail"],
+                          height: 150,
+                          width: 150,
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      mobile: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(height: defaultPadding),
+          Expanded(
+            child: Row(
+              children: [
+                const SizedBox(height: defaultPadding),
+                Expanded(
+                  child: ListView(
+                    controller: ScrollController(),
+                    children: [
+                      CustomListItem(
+                        user: 'Genero',
+                        price: steamPrice,
+                        thumbnail: Image.network(imageGame),
+                        title: 'Steam',
+                        icon: steamIcon,
+                        appid: steamAppid,
+                        steam: true,
+                        jsonDataGOG: '',
+                      ),
+                      CustomListItem(
+                        user: 'Genero',
+                        price: gogPrice,
+                        thumbnail: Image.network(imageGame),
+                        title: 'GOG',
+                        icon: gogIcon,
+                        appid: gogAppid,
+                        steam: false,
+                        jsonDataGOG: jsonDataGOG,
+                      ),
+                      GridView.builder(
+                        controller: ScrollController(),
+                        shrinkWrap: true,
+                        itemCount: 4,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 1,
+                        ),
+                        itemBuilder: (context, index) => Image.network(
+                          screenshots[index]["path_thumbnail"],
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -217,7 +359,7 @@ class _VideoDescription extends StatelessWidget {
           ),
           const Padding(padding: EdgeInsets.symmetric(vertical: 2.0)),
           Text(
-            user,
+            'Descrição: $user',
             style: const TextStyle(fontSize: 10.0),
           ),
           const Padding(padding: EdgeInsets.symmetric(vertical: 25.0)),
@@ -284,32 +426,78 @@ class CustomListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Expanded(
-            flex: 1,
-            child: thumbnail,
-          ),
-          Expanded(
-            flex: 3,
-            child: _VideoDescription(
-              title: title,
-              user: user,
-              price: price,
-              icon: icon,
-              appid: appid,
-              steamBool: steam,
-              jsonDataGOG: jsonDataGOG,
+    return Responsive(
+      desktop: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Expanded(
+              flex: 1,
+              child: thumbnail,
             ),
-          ),
-          const Icon(
-            Icons.more_vert,
-            size: 16.0,
-          ),
-        ],
+            Expanded(
+              flex: 3,
+              child: _VideoDescription(
+                title: title,
+                user: user,
+                price: price,
+                icon: icon,
+                appid: appid,
+                steamBool: steam,
+                jsonDataGOG: jsonDataGOG,
+              ),
+            ),
+          ],
+        ),
+      ),
+      tablet: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Expanded(
+              flex: 2,
+              child: thumbnail,
+            ),
+            Expanded(
+              flex: 3,
+              child: _VideoDescription(
+                title: title,
+                user: user,
+                price: price,
+                icon: icon,
+                appid: appid,
+                steamBool: steam,
+                jsonDataGOG: jsonDataGOG,
+              ),
+            ),
+          ],
+        ),
+      ),
+      mobile: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Expanded(
+              flex: 2,
+              child: thumbnail,
+            ),
+            Expanded(
+              flex: 3,
+              child: _VideoDescription(
+                title: title,
+                user: user,
+                price: price,
+                icon: icon,
+                appid: appid,
+                steamBool: steam,
+                jsonDataGOG: jsonDataGOG,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

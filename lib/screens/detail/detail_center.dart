@@ -22,10 +22,7 @@ class DetailCenter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Responsive(
-        mobile: Container(),
-        tablet: Container(),
-        desktop: Container(
+      body: Container(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -44,7 +41,6 @@ class DetailCenter extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 }

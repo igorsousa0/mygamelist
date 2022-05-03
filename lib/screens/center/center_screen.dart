@@ -50,6 +50,7 @@ class _ContentsState extends State<Contents> {
   static var gogUrls = [];
   var jsonDataSteamDetail;
   static var steamImages = [];
+  static var scoresGame = [];
   static var steamAppids = [];
   static var gogAppids = [];
   String jsonSteamImage = '';
@@ -103,11 +104,21 @@ class _ContentsState extends State<Contents> {
       var SteamAppid = i["appid"];
       //print(SteamAppid);
       http.Response responseSteam =
-          await http.get(Uri.parse("$apiSteam$SteamAppid&cc=BR"));   
+          await http.get(Uri.parse("$apiSteam$SteamAppid&cc=BR"));
       final jsonDataDetail = jsonDecode(responseSteam.body);
       var steamImage = jsonDataDetail["$SteamAppid"]["data"]["header_image"];
+      var scoreGame = jsonDataDetail["$SteamAppid"]["data"]["metacritic"];
+      if (scoreGame == null) {
+        scoresGame.add(null);
+      }
+      if (scoreGame != null) {
+        scoreGame =
+            jsonDataDetail["$SteamAppid"]["data"]["metacritic"]["score"];
+        scoresGame.add(scoreGame);
+      }
       steamImages.add(steamImage);
       steamAppids.add(SteamAppid);
+      //scoresGame.add(scoreGame);
       /*Steam steam = Steam(
         SteamAppid,
         steamImage,
@@ -157,6 +168,23 @@ class _ContentsState extends State<Contents> {
     //print(jsonDataSteamDetail['$appid']['data']['header_image']);
   }
 
+  Color colorScore(score) {
+    if (score >= 75) {
+      return Colors.lightGreen.shade600; //Color.fromARGB(0, 102, 204, 51);
+    } else if (score >= 50 && score <= 74) {
+      return Colors.yellow.shade600; //Color.fromARGB(0, 255, 204, 51);
+    } else {
+      return Colors.red.shade600; //Color.fromARGB(0, 255, 0, 0);
+    }
+  }
+
+  Color colorText(score) {
+    if (score >= 50 && score <= 74) {
+      return Colors.grey.shade600;
+    } else {
+      return Colors.white;
+    }
+  }
   /*_navigationWithText(BuildContext context, index) {
     final result = Navigator.push(
     context,
@@ -210,7 +238,9 @@ class _ContentsState extends State<Contents> {
                     crossAxisSpacing: defaultPadding * 2,
                     mainAxisSpacing: defaultPadding,
                   ),
-                  itemBuilder: (context, index) => Container(
+                  itemBuilder: (context, index) => Card(
+                    semanticContainer: true,
+                    clipBehavior: Clip.antiAliasWithSaveLayer,
                     child: Column(
                       children: [
                         InkWell(
@@ -226,16 +256,38 @@ class _ContentsState extends State<Contents> {
                                   ),
                                 ),
                             child: Image.network(steamImages[index])),
-                        Padding(
-                          padding:
-                              const EdgeInsets.only(top: defaultPadding / 2),
-                          child: Text(
+                        ListTile(
+                          title: Text(
                             jsonDataSteam[index]["name"],
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 11,
+                              fontSize: 15,
                             ),
                           ),
+                          leading: scoresGame[index] != null
+                              ? Container(
+                                  decoration: BoxDecoration(
+                                      color: colorScore(scoresGame[index])),
+                                  height: 27,
+                                  width: 27,
+                                  child: Center(
+                                    child: Text(scoresGame[index].toString(),
+                                        style: TextStyle(
+                                            color: colorText(scoresGame[index]),
+                                            fontWeight: FontWeight.bold)),
+                                  ))
+                              : Container(
+                                  decoration: BoxDecoration(
+                                      color: Colors
+                                          .blueGrey.shade400 //Colors.blue,
+                                      ),
+                                  height: 27,
+                                  width: 27,
+                                  child: Center(
+                                    child: Text('?',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold)),
+                                  )),
                         ),
                       ],
                     ),

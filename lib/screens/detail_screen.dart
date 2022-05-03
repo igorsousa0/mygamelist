@@ -8,6 +8,7 @@ import 'package:mygamelist/screens/detail/detail_center.dart';
 import 'package:mygamelist/screens/home/components/side_menu.dart';
 
 class DetailScreen extends StatelessWidget {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   var indexGame;
   final String nameGame;
   final String steamAppid;
@@ -22,9 +23,44 @@ class DetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
+      drawer: const SideMenu(),
       body: Responsive(
-        mobile: Container(),
-        tablet: Container(),
+        mobile: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Container(
+              margin: const EdgeInsets.only(left: 15, top: 23),
+              child: IconButton(
+                icon: Icon(Icons.menu),
+                onPressed: () {
+                  _scaffoldKey.currentState?.openDrawer();
+                },
+              ),
+            ),
+          Expanded(
+            flex: 5,
+            child: DetailCenter(
+              nameGame: nameGame,
+              indexGame: indexGame,
+              steamAppid: steamAppid,
+              gogAppid: gogAppid,
+            ),
+          ),
+        ]),
+        tablet: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Expanded(
+            flex: 1,
+            child: SideMenu(),
+          ),
+          Expanded(
+            flex: 4,
+            child: DetailCenter(
+              nameGame: nameGame,
+              indexGame: indexGame,
+              steamAppid: steamAppid,
+              gogAppid: gogAppid,
+            ),
+          ),
+        ]),
         desktop: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Expanded(
             child: SideMenu(),

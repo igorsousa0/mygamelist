@@ -44,8 +44,7 @@ class DetailHeader extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(
                 top: defaultPadding, left: defaultPadding),
-            child: Text(nameGame,
-                style: Theme.of(context).textTheme.headline6),
+            child: Text(nameGame, style: Theme.of(context).textTheme.headline6),
           ),
           const Spacer(flex: 1),
           const Expanded(
@@ -64,8 +63,7 @@ class DetailHeader extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(
                 top: defaultPadding, left: defaultPadding),
-            child: Text(nameGame,
-                style: Theme.of(context).textTheme.headline6),
+            child: Text(nameGame, style: Theme.of(context).textTheme.headline6),
           ),
           const Spacer(flex: 2),
           const Expanded(
@@ -82,4 +80,3 @@ class DetailHeader extends StatelessWidget {
     );
   }
 }
-
