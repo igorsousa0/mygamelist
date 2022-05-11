@@ -1,6 +1,9 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:mygamelist/user.dart';
+
+//Global Variables
 
 //API
 const String api = 'http://127.0.0.1:8000';

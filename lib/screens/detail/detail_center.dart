@@ -12,35 +12,41 @@ class DetailCenter extends StatelessWidget {
   var nameGame;
   var steamAppid;
   var gogAppid;
-  DetailCenter({
-    Key? key,
-    required this.indexGame,
-    required this.nameGame,
-    required this.steamAppid,
-    required this.gogAppid,
-  }) : super(key: key);
+  final String imageGame;
+  final String steamPrice;
+  DetailCenter(
+      {Key? key,
+      required this.indexGame,
+      required this.nameGame,
+      required this.steamAppid,
+      required this.gogAppid,
+      required this.imageGame,
+      required this.steamPrice})
+      : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Padding(
-                padding: EdgeInsets.only(right: defaultPadding),
-                child: DetailHeader(nameGame: nameGame),
-              ),
-              //Login(),
-              SizedBox(height: defaultPadding),
-              Expanded(
-                child: CenterPage(
-                    nameGame: nameGame,
-                    steamAppid: steamAppid,
-                    gogAppid: gogAppid),
-              ),
-            ],
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: EdgeInsets.only(right: defaultPadding),
+              child: DetailHeader(nameGame: nameGame),
+            ),
+            //Login(),
+            SizedBox(height: defaultPadding),
+            Expanded(
+              child: CenterPage(
+                  nameGame: nameGame,
+                  steamAppid: steamAppid,
+                  gogAppid: gogAppid,
+                  imageGame: imageGame,
+                  steamPrice: steamPrice),
+            ),
+          ],
         ),
-      );
+      ),
+    );
   }
 }

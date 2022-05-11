@@ -8,6 +8,10 @@ import 'package:mygamelist/user.dart';
 import 'dart:convert';
 
 class DetailHeader extends StatelessWidget {
+  voidFunction() {
+    return '';
+  }
+
   var nameGame;
   DetailHeader({
     Key? key,
@@ -28,14 +32,9 @@ class DetailHeader extends StatelessWidget {
                     .apply(fontSizeFactor: 1.4)),
           ),
           const Spacer(flex: 1),
-          const Expanded(
-              child: Padding(
-            padding: const EdgeInsets.only(top: defaultPadding),
-            child: SearchField(),
-          )),
           Padding(
             padding: const EdgeInsets.only(top: defaultPadding),
-            child: const ProfileCard(),
+            child: ProfileCard(),
           ),
         ],
       ),
@@ -47,14 +46,9 @@ class DetailHeader extends StatelessWidget {
             child: Text(nameGame, style: Theme.of(context).textTheme.headline6),
           ),
           const Spacer(flex: 1),
-          const Expanded(
-              child: Padding(
-            padding: const EdgeInsets.only(top: defaultPadding),
-            child: SearchField(),
-          )),
           Padding(
             padding: const EdgeInsets.only(top: defaultPadding),
-            child: const ProfileCard(),
+            child: ProfileCard(),
           ),
         ],
       ),
@@ -66,14 +60,9 @@ class DetailHeader extends StatelessWidget {
             child: Text(nameGame, style: Theme.of(context).textTheme.headline6),
           ),
           const Spacer(flex: 2),
-          const Expanded(
-              child: Padding(
-            padding: const EdgeInsets.only(top: defaultPadding),
-            child: SearchField(),
-          )),
           Padding(
             padding: const EdgeInsets.only(top: defaultPadding),
-            child: const ProfileCard(),
+            child: ProfileCard(),
           ),
         ],
       ),

@@ -2,12 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import 'package:mygamelist/config.dart';
+import 'package:mygamelist/model/steam.dart';
 import 'package:mygamelist/responsive.dart';
+import 'package:mygamelist/screens/center/center_screen.dart';
 import 'package:mygamelist/user.dart';
 import 'dart:convert';
 
 class Header extends StatelessWidget {
+  final String pageText;
+  final Function changeState;
   const Header({
+    required this.pageText,
+    required this.changeState,
     Key? key,
   }) : super(key: key);
 
@@ -19,20 +25,20 @@ class Header extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(
                 top: defaultPadding, left: defaultPadding),
-            child: Text('Pagina Inicial',
+            child: Text(pageText,
                 style: DefaultTextStyle.of(context)
                     .style
                     .apply(fontSizeFactor: 1.4)),
           ),
           const Spacer(flex: 1),
-          const Expanded(
+          Expanded(
               child: Padding(
             padding: const EdgeInsets.only(top: defaultPadding),
-            child: SearchField(),
+            child: SearchField(changeState: changeState),
           )),
           Padding(
             padding: const EdgeInsets.only(top: defaultPadding),
-            child: const ProfileCard(),
+            child: ProfileCard(),
           ),
         ],
       ),
@@ -45,14 +51,14 @@ class Header extends StatelessWidget {
                 style: Theme.of(context).textTheme.headline6),
           ),
           const Spacer(flex: 1),
-          const Expanded(
+          Expanded(
               child: Padding(
             padding: const EdgeInsets.only(top: defaultPadding),
-            child: SearchField(),
+            child: SearchField(changeState: changeState),
           )),
           Padding(
             padding: const EdgeInsets.only(top: defaultPadding),
-            child: const ProfileCard(),
+            child: ProfileCard(),
           ),
         ],
       ),
@@ -65,14 +71,14 @@ class Header extends StatelessWidget {
                 style: Theme.of(context).textTheme.headline6),
           ),
           const Spacer(flex: 2),
-          const Expanded(
+          Expanded(
               child: Padding(
             padding: const EdgeInsets.only(top: defaultPadding),
-            child: SearchField(),
+            child: SearchField(changeState: changeState),
           )),
           Padding(
             padding: const EdgeInsets.only(top: defaultPadding),
-            child: const ProfileCard(),
+            child: ProfileCard(),
           ),
         ],
       ),
@@ -81,9 +87,10 @@ class Header extends StatelessWidget {
 }
 
 class ProfileCard extends StatefulWidget {
-  const ProfileCard({
+  late Function stringTest;
+  /*const ProfileCard({
     Key? key,
-  }) : super(key: key);
+  }) : super(key: key);*/
 
   @override
   State<ProfileCard> createState() => _ProfileCardState();
@@ -96,21 +103,7 @@ class _ProfileCardState extends State<ProfileCard> {
 
   @override
   void initState() {
-    _retrieveUser();
     super.initState();
-  }
-
-  _retrieveUser() async {
-    users = [];
-    try {
-      http.Response response = await http.get(Uri.parse(api));
-      var data = json.decode(response.body);
-      data.forEach((user) {
-        users.add(User.fromMap(user));
-      });
-    } catch (e) {
-      print('Error is $e');
-    }
   }
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -343,14 +336,50 @@ class _ProfileCardState extends State<ProfileCard> {
   }
 }
 
-class SearchField extends StatelessWidget {
-  const SearchField({
+class SearchField extends StatefulWidget {
+  final Function changeState;
+  SearchField({
+    required this.changeState,
     Key? key,
   }) : super(key: key);
 
   @override
+  State<SearchField> createState() => _SearchFieldState();
+}
+
+class _SearchFieldState extends State<SearchField> {
+  final TextEditingController _searchQuery = TextEditingController();
+  late List<Steam> _list;
+  late List<Steam> _searchList;
+  final key = GlobalKey<ScaffoldState>();
+  late bool _IsSearching;
+  String _searchText = "";
+
+  _SearchListState() {
+    _searchQuery.addListener(() {
+      if (_searchQuery.text.isEmpty) {
+        setState(() {
+          _IsSearching = false;
+          _searchText = "";
+        });
+      } else {
+        setState(() {
+          _IsSearching = true;
+          _searchText = _searchQuery.text;
+        });
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _IsSearching = false;
+  }
+
   Widget build(BuildContext context) {
     return TextField(
+      controller: _searchQuery,
       decoration: InputDecoration(
           hintText: "Search",
           fillColor: textFieldColor,
@@ -360,7 +389,9 @@ class SearchField extends StatelessWidget {
             borderRadius: BorderRadius.all(Radius.circular(10)),
           ),
           suffixIcon: InkWell(
-            onTap: () {},
+            onTap: () {
+              widget.changeState(_searchQuery.text);
+            },
             child: Container(
               padding: const EdgeInsets.all(defaultPadding * 0.75),
               margin:
@@ -369,8 +400,13 @@ class SearchField extends StatelessWidget {
                 color: iconSearchColor,
                 borderRadius: const BorderRadius.all(Radius.circular(10)),
               ),
-              child: Image.asset(
-                searchIcon,
+              child: InkWell(
+                onTap: () {
+                  widget.changeState(_searchQuery.text);
+                },
+                child: Image.asset(
+                  searchIcon,
+                ),
               ),
             ),
           )),

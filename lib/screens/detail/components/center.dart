@@ -15,20 +15,24 @@ import 'package:intl/intl_browser.dart';
 class CenterPage extends StatelessWidget {
   //var indexGame;
   var nameGame;
-  var imageGame;
-  var steamPrice;
   var steamAppid;
   var gogAppid;
   var gogPrice;
   var jsonDataGOG;
   var screenshots = [];
-  CenterPage({
-    Key? key,
-    //required this.indexGame,
-    required this.nameGame,
-    required this.steamAppid,
-    required this.gogAppid,
-  }) : super(key: key);
+  var descGame;
+  var genresGame = [];
+  final String imageGame;
+  final String steamPrice;
+  CenterPage(
+      {Key? key,
+      //required this.indexGame,
+      required this.nameGame,
+      required this.steamAppid,
+      required this.gogAppid,
+      required this.imageGame,
+      required this.steamPrice})
+      : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,18 +49,18 @@ class CenterPage extends StatelessWidget {
                   child: Text('Algum error ocorreu'),
                 );
               } else {
-                return Column(children: [
-                  Container(
-                    child: Expanded(
-                      child: GameDetailCard(
-                          steamPrice: steamPrice,
-                          imageGame: imageGame,
-                          steamAppid: steamAppid,
-                          gogPrice: gogPrice,
-                          gogAppid: gogAppid,
-                          jsonDataGOG: jsonDataGOG,
-                          screenshots: screenshots),
-                    ),
+                return Row(children: [
+                  Expanded(
+                    child: GameDetailCard(
+                        steamPrice: steamPrice,
+                        imageGame: imageGame,
+                        steamAppid: steamAppid,
+                        gogPrice: gogPrice,
+                        gogAppid: gogAppid,
+                        jsonDataGOG: jsonDataGOG,
+                        screenshots: screenshots,
+                        descGame: descGame,
+                        genresGame: genresGame),
                   ),
                 ]);
               }
@@ -77,21 +81,20 @@ class CenterPage extends StatelessWidget {
         await http.get(Uri.parse("$apiGOG$gogAppid"));
     final jsonDataApiGOG = jsonDecode(responseGOGDetail.body);
     jsonDataGOG = jsonDataApiGOG;
-    imageGame = jsonDataDetail["$steamAppid"]["data"]["header_image"];
-    steamPrice = jsonDataDetail["$steamAppid"]["data"]["price_overview"]
-        ["final_formatted"];
     screenshots = jsonDataDetail["$steamAppid"]["data"]["screenshots"];
-    //print(screenshots[0]["id"]);
     gogPrice = jsonDataPriceGOG["_embedded"]["prices"][0]["finalPrice"];
     if (gogPrice != null && gogPrice.length > 0) {
       gogPrice = gogPrice.substring(0, gogPrice.length - 4);
     }
     final currencyFormatter = NumberFormat('#,##0.00', 'pt_BR');
     var format = NumberFormat.simpleCurrency(locale: 'pt_BR');
-    steamPrice = steamPrice.substring(3, steamPrice.length);
-    steamPrice = "${format.currencySymbol}" + steamPrice;
     gogPrice = "${format.currencySymbol}" +
         currencyFormatter.format(int.parse(gogPrice) / 100);
+    var detailGame = jsonDataDetail["$steamAppid"]["data"]["short_description"];
+    descGame = detailGame;
+    var genreGame = jsonDataDetail["$steamAppid"]["data"]["genres"];
+    genresGame = genreGame;
+    //print(genresGame[0]["description"]);
     // Estruturação no nome para uso da API Metacritic
     /*String nameTest = nameGame;
     nameTest = nameTest.replaceAll('  ', ' ');
@@ -142,6 +145,8 @@ class GameDetailCard extends StatelessWidget {
     required this.gogPrice,
     required this.jsonDataGOG,
     required this.screenshots,
+    required this.descGame,
+    required this.genresGame,
   }) : super(key: key);
 
   var steamPrice;
@@ -151,16 +156,18 @@ class GameDetailCard extends StatelessWidget {
   var gogAppid;
   var jsonDataGOG;
   var screenshots = [];
+  var descGame;
+  var genresGame = [];
 
   @override
   Widget build(BuildContext context) {
     return Responsive(
-      desktop: Column(
+      desktop: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SizedBox(height: defaultPadding),
           Expanded(
-            child: Row(
+            child: Column(
               children: [
                 const SizedBox(height: defaultPadding),
                 Expanded(
@@ -176,6 +183,8 @@ class GameDetailCard extends StatelessWidget {
                         appid: steamAppid,
                         steam: true,
                         jsonDataGOG: '',
+                        descGame: descGame,
+                        genresGame: genresGame,
                       ),
                       CustomListItem(
                         user: 'Genero',
@@ -186,6 +195,8 @@ class GameDetailCard extends StatelessWidget {
                         appid: gogAppid,
                         steam: false,
                         jsonDataGOG: jsonDataGOG,
+                        descGame: '',
+                        genresGame: [],
                       ),
                       GridView.builder(
                         controller: ScrollController(),
@@ -232,17 +243,20 @@ class GameDetailCard extends StatelessWidget {
                         appid: steamAppid,
                         steam: true,
                         jsonDataGOG: '',
+                        descGame: descGame,
+                        genresGame: genresGame,
                       ),
                       CustomListItem(
-                        user: 'Genero',
-                        price: gogPrice,
-                        thumbnail: Image.network(imageGame),
-                        title: 'GOG',
-                        icon: gogIcon,
-                        appid: gogAppid,
-                        steam: false,
-                        jsonDataGOG: jsonDataGOG,
-                      ),
+                          user: 'Genero',
+                          price: gogPrice,
+                          thumbnail: Image.network(imageGame),
+                          title: 'GOG',
+                          icon: gogIcon,
+                          appid: gogAppid,
+                          steam: false,
+                          jsonDataGOG: jsonDataGOG,
+                          descGame: 'Teste',
+                          genresGame: []),
                       GridView.builder(
                         controller: ScrollController(),
                         shrinkWrap: true,
@@ -288,6 +302,8 @@ class GameDetailCard extends StatelessWidget {
                         appid: steamAppid,
                         steam: true,
                         jsonDataGOG: '',
+                        descGame: descGame,
+                        genresGame: genresGame,
                       ),
                       CustomListItem(
                         user: 'Genero',
@@ -298,6 +314,8 @@ class GameDetailCard extends StatelessWidget {
                         appid: gogAppid,
                         steam: false,
                         jsonDataGOG: jsonDataGOG,
+                        descGame: '',
+                        genresGame: [],
                       ),
                       GridView.builder(
                         controller: ScrollController(),
@@ -333,6 +351,7 @@ class _VideoDescription extends StatelessWidget {
     required this.appid,
     required this.steamBool,
     required this.jsonDataGOG,
+    required this.genresGame,
   }) : super(key: key);
 
   final String title;
@@ -342,6 +361,7 @@ class _VideoDescription extends StatelessWidget {
   final String appid;
   final bool steamBool;
   var jsonDataGOG;
+  var genresGame;
 
   @override
   Widget build(BuildContext context) {
@@ -403,17 +423,19 @@ class _VideoDescription extends StatelessWidget {
 }
 
 class CustomListItem extends StatelessWidget {
-  CustomListItem({
-    Key? key,
-    required this.thumbnail,
-    required this.title,
-    required this.user,
-    required this.price,
-    required this.icon,
-    required this.appid,
-    required this.steam,
-    required this.jsonDataGOG,
-  }) : super(key: key);
+  CustomListItem(
+      {Key? key,
+      required this.thumbnail,
+      required this.title,
+      required this.user,
+      required this.price,
+      required this.icon,
+      required this.appid,
+      required this.steam,
+      required this.jsonDataGOG,
+      required this.descGame,
+      required this.genresGame})
+      : super(key: key);
 
   final Widget thumbnail;
   final String title;
@@ -422,13 +444,15 @@ class CustomListItem extends StatelessWidget {
   final String icon;
   final String appid;
   final bool steam;
+  final String descGame;
   var jsonDataGOG;
+  var genresGame = [];
 
   @override
   Widget build(BuildContext context) {
     return Responsive(
       desktop: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+        padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -437,7 +461,6 @@ class CustomListItem extends StatelessWidget {
               child: thumbnail,
             ),
             Expanded(
-              flex: 3,
               child: _VideoDescription(
                 title: title,
                 user: user,
@@ -446,8 +469,14 @@ class CustomListItem extends StatelessWidget {
                 appid: appid,
                 steamBool: steam,
                 jsonDataGOG: jsonDataGOG,
+                genresGame: genresGame,
               ),
             ),
+            Expanded(
+                flex: 2,
+                child: steam == true
+                    ? DetailCard(descGame: descGame, genresGame: genresGame)
+                    : Container())
           ],
         ),
       ),
@@ -463,14 +492,14 @@ class CustomListItem extends StatelessWidget {
             Expanded(
               flex: 3,
               child: _VideoDescription(
-                title: title,
-                user: user,
-                price: price,
-                icon: icon,
-                appid: appid,
-                steamBool: steam,
-                jsonDataGOG: jsonDataGOG,
-              ),
+                  title: title,
+                  user: user,
+                  price: price,
+                  icon: icon,
+                  appid: appid,
+                  steamBool: steam,
+                  jsonDataGOG: jsonDataGOG,
+                  genresGame: genresGame),
             ),
           ],
         ),
@@ -487,17 +516,73 @@ class CustomListItem extends StatelessWidget {
             Expanded(
               flex: 3,
               child: _VideoDescription(
-                title: title,
-                user: user,
-                price: price,
-                icon: icon,
-                appid: appid,
-                steamBool: steam,
-                jsonDataGOG: jsonDataGOG,
-              ),
+                  title: title,
+                  user: user,
+                  price: price,
+                  icon: icon,
+                  appid: appid,
+                  steamBool: steam,
+                  jsonDataGOG: jsonDataGOG,
+                  genresGame: genresGame),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class DetailCard extends StatelessWidget {
+  DetailCard({
+    Key? key,
+    required this.descGame,
+    required this.genresGame,
+  }) : super(key: key);
+
+  _genresGame() {
+    genresText = genresGame[0]["description"];
+    var length = genresGame.length;
+    if (length > 1) {
+      for (int i = 1; i < length; i++) {
+        var text = genresGame[i]["description"];
+        genresText = genresText + ', ' + '$text';
+      }
+    }
+    return genresText;
+  }
+
+  final String descGame;
+  var genresGame;
+  var genresText;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Colors.grey,
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: RichText(
+                  text: TextSpan(children: <TextSpan>[
+                TextSpan(
+                    text: 'Descrição: ',
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                TextSpan(text: descGame),
+              ])) //Text('Descrição :$descGame'),
+              ),
+          Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: RichText(
+                  text: TextSpan(children: <TextSpan>[
+                TextSpan(
+                    text: 'Genero(s): ',
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                TextSpan(text: _genresGame())
+              ])) //Text('Descrição :$descGame'),
+              ),
+        ],
       ),
     );
   }

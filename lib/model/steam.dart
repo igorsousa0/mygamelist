@@ -1,11 +1,14 @@
 class Steam {
   final String appid;
+  final String name;
   final String image;
-  final double price;
+  final int? score;
+  final String price;
 
   Steam(
-    this.appid,
-    this.image,
-    this.price
-  );
+      {required this.appid,
+      required this.name,
+      required this.image,
+      required this.score,
+      required this.price});
 }

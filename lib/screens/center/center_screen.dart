@@ -1,13 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:mygamelist/config.dart';
 import 'package:mygamelist/model/steam.dart';
 import 'package:mygamelist/screens/detail_screen.dart';
+import 'package:mygamelist/user.dart';
 import 'components/header.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class CenterScreen extends StatelessWidget {
+class CenterScreen extends StatefulWidget {
   const CenterScreen({Key? key}) : super(key: key);
+
+  @override
+  State<CenterScreen> createState() => _CenterScreenState();
+}
+
+class _CenterScreenState extends State<CenterScreen> {
+  String steamFilter = '';
+  changeState(String text) {
+    setState(() {
+      steamFilter = text;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,12 +33,13 @@ class CenterScreen extends StatelessWidget {
           children: [
             Padding(
               padding: EdgeInsets.only(right: defaultPadding),
-              child: Header(),
+              child:
+                  Header(changeState: changeState, pageText: 'Pagina Inicial'),
             ),
             //Login(),
             SizedBox(height: defaultPadding),
             Expanded(
-              child: Contents(),
+              child: Contents(steamFilter: steamFilter),
             ),
             ControlPage(),
           ],
@@ -35,7 +50,9 @@ class CenterScreen extends StatelessWidget {
 }
 
 class Contents extends StatefulWidget {
-  const Contents({
+  final String steamFilter;
+  Contents({
+    required this.steamFilter,
     Key? key,
   }) : super(key: key);
 
@@ -44,137 +61,66 @@ class Contents extends StatefulWidget {
 }
 
 class _ContentsState extends State<Contents> {
-  var Steamlenght;
-  static var jsonDataSteam;
-  static var jsonDataGOG;
   static var gogUrls = [];
-  var jsonDataSteamDetail;
-  static var steamImages = [];
-  static var scoresGame = [];
-  static var steamAppids = [];
   static var gogAppids = [];
-  String jsonSteamImage = '';
-
-  consultaImageSteam(index, appid) async {
-    http.Response responseDetail = await http.get(Uri.parse("$apiSteam$appid"));
-    final jsonDataDetail = jsonDecode(responseDetail.body);
-    final jsonDataImage = jsonDataDetail['$appid']['data']['header_image'];
-    final jsonDataPrice =
-        jsonDataDetail['$appid']['data']['price_overview']['final_formatted'];
-    /*setState(() {
-      jsonSteamImage = '$jsonDataImage';
-      listImage.add(jsonSteamImage);
-      steamPrice = jsonDataPrice;
-    });*/
-  }
-
   @override
   void initState() {
-    //consultarTamanhoSteam();
-    //consultarInfoSteam(2990);
     super.initState();
+    //test = ProfileCard(this.cal)
   }
 
-  /*Future consultarTamanhoSteam() async {
-    http.Response response = await http.get(Uri.parse("$api/steam/"));
-    final jsonData = jsonDecode(response.body);
-    setState(() {
-      lenght = jsonData.length;
-      jsonDataSteam = jsonData;
-    });
-    consultaSteam(1);
-  }*/
-
-  Future<List<Steam>> consultarTamanhoSteam() async {
-    http.Response responseApiSteam = await http.get(Uri.parse("$api/steam/"));
+  Future<List<Steam>> consultarDados() async {
+    var steamFilter = widget.steamFilter;
+    http.Response responseApiSteam =
+        await http.get(Uri.parse("$api/steamapi/?name=$steamFilter"));
     var jsonDataApiSteam = jsonDecode(responseApiSteam.body);
-    jsonDataSteam = jsonDataApiSteam;
     http.Response responseApiGOG = await http.get(Uri.parse("$api/gog/"));
     var jsonDataApiGOG = jsonDecode(responseApiGOG.body);
-    jsonDataGOG = jsonDataApiGOG;
-    /*setState(() {
-      lenght = jsonData.length;
-      jsonDataSteam = jsonData;
-    });*/
-    Steamlenght = jsonDataApiSteam.length;
     List<Steam> steams = [];
     List<String> steamDetail;
     for (var i in jsonDataApiSteam) {
-      //print(i["appid"]);
       var SteamAppid = i["appid"];
-      //print(SteamAppid);
       http.Response responseSteam =
           await http.get(Uri.parse("$apiSteam$SteamAppid&cc=BR"));
       final jsonDataDetail = jsonDecode(responseSteam.body);
-      var steamImage = jsonDataDetail["$SteamAppid"]["data"]["header_image"];
       var scoreGame = jsonDataDetail["$SteamAppid"]["data"]["metacritic"];
+
       if (scoreGame == null) {
-        scoresGame.add(null);
-      }
-      if (scoreGame != null) {
+        scoreGame = null;
+      } else {
         scoreGame =
             jsonDataDetail["$SteamAppid"]["data"]["metacritic"]["score"];
-        scoresGame.add(scoreGame);
       }
-      steamImages.add(steamImage);
-      steamAppids.add(SteamAppid);
-      //scoresGame.add(scoreGame);
-      /*Steam steam = Steam(
-        SteamAppid,
-        steamImage,
-        steamPrice,
-      );*/
-      /*setState(() {
-        steamImages.add(steamImage);
-      });*/
+      String steamPrice = jsonDataDetail["$SteamAppid"]["data"]
+          ["price_overview"]["final_formatted"];
+      final currencyFormatter = NumberFormat('#,##0.00', 'pt_BR');
+      var format = NumberFormat.simpleCurrency(locale: 'pt_BR');
+      steamPrice = steamPrice.substring(3, steamPrice.length);
+      steamPrice = "${format.currencySymbol}" + steamPrice;
+
+      Steam steam = Steam(
+        appid: i["appid"],
+        name: i["name"],
+        image: jsonDataDetail["$SteamAppid"]["data"]["header_image"],
+        score: scoreGame,
+        price: steamPrice,
+      );
+      steams.add(steam);
     }
     for (var i in jsonDataApiGOG) {
       var gogAppid = i["appid"];
       gogAppids.add(gogAppid);
-      //http.Response responseGOGPrice = await http.get(Uri.parse("$apiGOGPrice$gogAppid/prices?countryCode=BR"));
-      //final jsonDataPriceGOG = jsonDecode(responseGOGPrice.body);
-      //print(jsonDataPriceGOG["_embedded"]["prices"][0]["finalPrice"]);
-      //var gogPrice = jsonDataPriceGOG["_embedded"]["prices"][0]["finalPrice"];
-      //gogPrices.add(gogPrice);
-      //print(jsonDataPriceGOG["_embedded"]["prices"]["finalPrice"]);
     }
     return steams;
-    /*setState(() {
-      lenght = jsonData.length;
-      jsonDataSteam = jsonData;
-    });
-    consultaSteam(1);*/
-  }
-
-  /*consultaSteam(index) async {
-    while (index < lenght) {
-      http.Response response = await http.get(Uri.parse("$api/steam/$index"));
-      if (response.statusCode == 200) {
-        final jsonData = jsonDecode(response.body);
-        final appid = jsonData['appid'];
-        consultaImageSteam(index, appid);
-        index = index + 1;
-      }
-    }
-    print(listImage);
-  }*/
-
-  consultarInfoSteam(appid) async {
-    http.Response response = await http.get(Uri.parse("$apiSteam$appid"));
-    final jsonData = jsonDecode(response.body);
-    setState(() {
-      jsonDataSteamDetail = jsonData;
-    });
-    //print(jsonDataSteamDetail['$appid']['data']['header_image']);
   }
 
   Color colorScore(score) {
     if (score >= 75) {
-      return Colors.lightGreen.shade600; //Color.fromARGB(0, 102, 204, 51);
+      return Colors.lightGreen.shade600;
     } else if (score >= 50 && score <= 74) {
-      return Colors.yellow.shade600; //Color.fromARGB(0, 255, 204, 51);
+      return Colors.yellow.shade600;
     } else {
-      return Colors.red.shade600; //Color.fromARGB(0, 255, 0, 0);
+      return Colors.red.shade600;
     }
   }
 
@@ -185,19 +131,12 @@ class _ContentsState extends State<Contents> {
       return Colors.white;
     }
   }
-  /*_navigationWithText(BuildContext context, index) {
-    final result = Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => const DetailScreen(game: Steamlenght[index])),
-  );
-    print(context);
-  }*/
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: FutureBuilder(
-          future: consultarTamanhoSteam(),
+          future: consultarDados(),
           builder: (context, AsyncSnapshot snapshot) {
             if (snapshot.data == null) {
               return const Center(
@@ -209,14 +148,14 @@ class _ContentsState extends State<Contents> {
                   child: Text('Algum error ocorreu'),
                 );
               } else {
-                return ItemCard();
+                return ItemCard(snapshot);
               }
             }
           }),
     );
   }
 
-  Widget ItemCard() {
+  Widget ItemCard(snapshot) {
     return Container(
       padding: const EdgeInsets.only(
           left: defaultPadding, right: defaultPadding, top: defaultPadding),
@@ -232,7 +171,7 @@ class _ContentsState extends State<Contents> {
                 child: GridView.builder(
                   controller: ScrollController(),
                   shrinkWrap: true,
-                  itemCount: Steamlenght,
+                  itemCount: snapshot.data.length,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 4,
                     crossAxisSpacing: defaultPadding * 2,
@@ -248,32 +187,37 @@ class _ContentsState extends State<Contents> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => DetailScreen(
-                                      indexGame: jsonDataSteam[index],
-                                      nameGame: jsonDataSteam[index]["name"],
-                                      steamAppid: steamAppids[index],
+                                      indexGame: snapshot.data[index],
+                                      nameGame: snapshot.data[index].name,
+                                      steamAppid: snapshot.data[index].appid,
+                                      steamPrice: snapshot.data[index].price,
+                                      imageGame: snapshot.data[index].image,
                                       gogAppid: gogAppids[index],
                                     ),
                                   ),
                                 ),
-                            child: Image.network(steamImages[index])),
+                            child: Image.network(snapshot.data[index].image)),
                         ListTile(
                           title: Text(
-                            jsonDataSteam[index]["name"],
+                            snapshot.data[index].name,
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 15,
                             ),
                           ),
-                          leading: scoresGame[index] != null
+                          leading: snapshot.data[index].score != null
                               ? Container(
                                   decoration: BoxDecoration(
-                                      color: colorScore(scoresGame[index])),
+                                      color: colorScore(
+                                          snapshot.data[index].score)),
                                   height: 27,
                                   width: 27,
                                   child: Center(
-                                    child: Text(scoresGame[index].toString(),
+                                    child: Text(
+                                        (snapshot.data[index].score).toString(),
                                         style: TextStyle(
-                                            color: colorText(scoresGame[index]),
+                                            color: colorText(
+                                                snapshot.data[index].score),
                                             fontWeight: FontWeight.bold)),
                                   ))
                               : Container(
