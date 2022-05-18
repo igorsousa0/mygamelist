@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mygamelist/config.dart';
 import 'package:mygamelist/model/steam.dart';
+import 'package:mygamelist/responsive.dart';
 import 'package:mygamelist/screens/detail_screen.dart';
 import 'package:mygamelist/user.dart';
 import 'components/header.dart';
@@ -9,7 +10,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class CenterScreen extends StatefulWidget {
-  const CenterScreen({Key? key}) : super(key: key);
+  CenterScreen({
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<CenterScreen> createState() => _CenterScreenState();
@@ -17,9 +20,17 @@ class CenterScreen extends StatefulWidget {
 
 class _CenterScreenState extends State<CenterScreen> {
   String steamFilter = '';
-  changeState(String text) {
+
+  changeStateSteam(String text) {
     setState(() {
       steamFilter = text;
+    });
+  }
+
+  changeStateLogin(bool loginState, String loginText) {
+    setState(() {
+      loginTextGlobal = loginText;
+      loginGlobal = loginState;
     });
   }
 
@@ -33,15 +44,18 @@ class _CenterScreenState extends State<CenterScreen> {
           children: [
             Padding(
               padding: EdgeInsets.only(right: defaultPadding),
-              child:
-                  Header(changeState: changeState, pageText: 'Pagina Inicial'),
+              child: Header(
+                  changeState: changeStateSteam,
+                  pageState: 'Home_Page',
+                  pageText: 'Pagina Inicial'),
             ),
             //Login(),
             SizedBox(height: defaultPadding),
             Expanded(
-              child: Contents(steamFilter: steamFilter),
+              child: Contents(
+                steamFilter: steamFilter,
+              ),
             ),
-            ControlPage(),
           ],
         ),
       ),
@@ -156,121 +170,280 @@ class _ContentsState extends State<Contents> {
   }
 
   Widget ItemCard(snapshot) {
-    return Container(
-      padding: const EdgeInsets.only(
-          left: defaultPadding, right: defaultPadding, top: defaultPadding),
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(10)),
-      ),
-      child: PageView(
-        children: [
-          Column(
-            children: [
-              const SizedBox(height: defaultPadding),
-              Expanded(
-                child: GridView.builder(
-                  controller: ScrollController(),
-                  shrinkWrap: true,
-                  itemCount: snapshot.data.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4,
-                    crossAxisSpacing: defaultPadding * 2,
-                    mainAxisSpacing: defaultPadding,
-                  ),
-                  itemBuilder: (context, index) => Card(
-                    semanticContainer: true,
-                    clipBehavior: Clip.antiAliasWithSaveLayer,
-                    child: Column(
-                      children: [
-                        InkWell(
-                            onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => DetailScreen(
-                                      indexGame: snapshot.data[index],
-                                      nameGame: snapshot.data[index].name,
-                                      steamAppid: snapshot.data[index].appid,
-                                      steamPrice: snapshot.data[index].price,
-                                      imageGame: snapshot.data[index].image,
-                                      gogAppid: gogAppids[index],
+    return Responsive(
+      tablet: Container(
+        padding: const EdgeInsets.only(
+            left: defaultPadding, right: defaultPadding, top: defaultPadding),
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+        ),
+        child: PageView(
+          children: [
+            Column(
+              children: [
+                const SizedBox(height: defaultPadding),
+                Expanded(
+                  child: GridView.builder(
+                    controller: ScrollController(),
+                    shrinkWrap: true,
+                    itemCount: snapshot.data.length,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: defaultPadding * 2,
+                      mainAxisSpacing: defaultPadding,
+                    ),
+                    itemBuilder: (context, index) => Card(
+                      semanticContainer: true,
+                      clipBehavior: Clip.antiAliasWithSaveLayer,
+                      child: Column(
+                        children: [
+                          InkWell(
+                              onTap: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => DetailScreen(
+                                        indexGame: snapshot.data[index],
+                                        nameGame: snapshot.data[index].name,
+                                        steamAppid: snapshot.data[index].appid,
+                                        steamPrice: snapshot.data[index].price,
+                                        imageGame: snapshot.data[index].image,
+                                        gogAppid: gogAppids[index],
+                                      ),
                                     ),
                                   ),
+                              child: Image.network(snapshot.data[index].image)),
+                          Expanded(
+                            child: ListTile(
+                              title: Text(
+                                snapshot.data[index].name,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
                                 ),
-                            child: Image.network(snapshot.data[index].image)),
-                        ListTile(
-                          title: Text(
-                            snapshot.data[index].name,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
+                              ),
+                              leading: snapshot.data[index].score != null
+                                  ? Container(
+                                      decoration: BoxDecoration(
+                                          color: colorScore(
+                                              snapshot.data[index].score)),
+                                      height: 27,
+                                      width: 27,
+                                      child: Center(
+                                        child: Text(
+                                            (snapshot.data[index].score)
+                                                .toString(),
+                                            style: TextStyle(
+                                                color: colorText(
+                                                    snapshot.data[index].score),
+                                                fontWeight: FontWeight.bold)),
+                                      ))
+                                  : Container(
+                                      decoration: BoxDecoration(
+                                          color: Colors
+                                              .blueGrey.shade400 //Colors.blue,
+                                          ),
+                                      height: 27,
+                                      width: 27,
+                                      child: Center(
+                                        child: Text('?',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold)),
+                                      )),
                             ),
                           ),
-                          leading: snapshot.data[index].score != null
-                              ? Container(
-                                  decoration: BoxDecoration(
-                                      color: colorScore(
-                                          snapshot.data[index].score)),
-                                  height: 27,
-                                  width: 27,
-                                  child: Center(
-                                    child: Text(
-                                        (snapshot.data[index].score).toString(),
-                                        style: TextStyle(
-                                            color: colorText(
-                                                snapshot.data[index].score),
-                                            fontWeight: FontWeight.bold)),
-                                  ))
-                              : Container(
-                                  decoration: BoxDecoration(
-                                      color: Colors
-                                          .blueGrey.shade400 //Colors.blue,
-                                      ),
-                                  height: 27,
-                                  width: 27,
-                                  child: Center(
-                                    child: Text('?',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold)),
-                                  )),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          )
-        ],
-      ),
-    );
-  }
-}
-
-class ControlPage extends StatelessWidget {
-  const ControlPage({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: const [
-            Spacer(),
-            Icon(
-              Icons.arrow_back_ios_outlined,
-              color: Colors.white54,
-              size: 24.0,
-            ),
-            Icon(
-              Icons.arrow_forward_ios_outlined,
-              color: Colors.white54,
-              size: 24.0,
-            ),
+              ],
+            )
           ],
-        )
-      ],
+        ),
+      ),
+      mobile: Container(
+        padding: const EdgeInsets.only(
+            left: defaultPadding, right: defaultPadding, top: defaultPadding),
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+        ),
+        child: PageView(
+          children: [
+            Column(
+              children: [
+                const SizedBox(height: defaultPadding),
+                Expanded(
+                  child: GridView.builder(
+                    controller: ScrollController(),
+                    shrinkWrap: true,
+                    itemCount: snapshot.data.length,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: defaultPadding * 2,
+                      mainAxisSpacing: defaultPadding,
+                    ),
+                    itemBuilder: (context, index) => Card(
+                      semanticContainer: true,
+                      clipBehavior: Clip.antiAliasWithSaveLayer,
+                      child: Column(
+                        children: [
+                          InkWell(
+                              onTap: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => DetailScreen(
+                                        indexGame: snapshot.data[index],
+                                        nameGame: snapshot.data[index].name,
+                                        steamAppid: snapshot.data[index].appid,
+                                        steamPrice: snapshot.data[index].price,
+                                        imageGame: snapshot.data[index].image,
+                                        gogAppid: gogAppids[index],
+                                      ),
+                                    ),
+                                  ),
+                              child: Image.network(snapshot.data[index].image)),
+                          Expanded(
+                            child: ListTile(
+                              title: Text(
+                                snapshot.data[index].name,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                ),
+                              ),
+                              leading: snapshot.data[index].score != null
+                                  ? Container(
+                                      decoration: BoxDecoration(
+                                          color: colorScore(
+                                              snapshot.data[index].score)),
+                                      height: 27,
+                                      width: 27,
+                                      child: Center(
+                                        child: Text(
+                                            (snapshot.data[index].score)
+                                                .toString(),
+                                            style: TextStyle(
+                                                color: colorText(
+                                                    snapshot.data[index].score),
+                                                fontWeight: FontWeight.bold)),
+                                      ))
+                                  : Container(
+                                      decoration: BoxDecoration(
+                                          color: Colors
+                                              .blueGrey.shade400 //Colors.blue,
+                                          ),
+                                      height: 27,
+                                      width: 27,
+                                      child: Center(
+                                        child: Text('?',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold)),
+                                      )),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
+      desktop: Container(
+        padding: const EdgeInsets.only(
+            left: defaultPadding, right: defaultPadding, top: defaultPadding),
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+        ),
+        child: PageView(
+          children: [
+            Column(
+              children: [
+                const SizedBox(height: defaultPadding),
+                Expanded(
+                  child: GridView.builder(
+                    controller: ScrollController(),
+                    shrinkWrap: true,
+                    itemCount: snapshot.data.length,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4,
+                      crossAxisSpacing: defaultPadding * 2,
+                      mainAxisSpacing: defaultPadding,
+                    ),
+                    itemBuilder: (context, index) => Card(
+                      semanticContainer: true,
+                      clipBehavior: Clip.antiAliasWithSaveLayer,
+                      child: Column(
+                        children: [
+                          InkWell(
+                              onTap: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => DetailScreen(
+                                        indexGame: snapshot.data[index],
+                                        nameGame: snapshot.data[index].name,
+                                        steamAppid: snapshot.data[index].appid,
+                                        steamPrice: snapshot.data[index].price,
+                                        imageGame: snapshot.data[index].image,
+                                        gogAppid: gogAppids[index],
+                                      ),
+                                    ),
+                                  ),
+                              child: Image.network(snapshot.data[index].image)),
+                          Expanded(
+                            child: ListTile(
+                              title: Text(
+                                snapshot.data[index].name,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                ),
+                              ),
+                              leading: snapshot.data[index].score != null
+                                  ? Container(
+                                      decoration: BoxDecoration(
+                                          color: colorScore(
+                                              snapshot.data[index].score)),
+                                      height: 27,
+                                      width: 27,
+                                      child: Center(
+                                        child: Text(
+                                            (snapshot.data[index].score)
+                                                .toString(),
+                                            style: TextStyle(
+                                                color: colorText(
+                                                    snapshot.data[index].score),
+                                                fontWeight: FontWeight.bold)),
+                                      ))
+                                  : Container(
+                                      decoration: BoxDecoration(
+                                          color: Colors
+                                              .blueGrey.shade400 //Colors.blue,
+                                          ),
+                                      height: 27,
+                                      width: 27,
+                                      child: Center(
+                                        child: Text('?',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold)),
+                                      )),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
     );
   }
 }

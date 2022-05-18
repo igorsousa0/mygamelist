@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import 'package:mygamelist/config.dart';
@@ -10,9 +11,11 @@ import 'dart:convert';
 
 class Header extends StatelessWidget {
   final String pageText;
+  final String pageState;
   final Function changeState;
-  const Header({
+  Header({
     required this.pageText,
+    required this.pageState,
     required this.changeState,
     Key? key,
   }) : super(key: key);
@@ -47,8 +50,7 @@ class Header extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(
                 top: defaultPadding, left: defaultPadding),
-            child: Text('Pagina Inicial',
-                style: Theme.of(context).textTheme.headline6),
+            child: Text(pageText, style: Theme.of(context).textTheme.headline6),
           ),
           const Spacer(flex: 1),
           Expanded(
@@ -67,15 +69,16 @@ class Header extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(
                 top: defaultPadding, left: defaultPadding),
-            child: Text('Pagina Inicial',
-                style: Theme.of(context).textTheme.headline6),
+            child: Text(pageText, style: Theme.of(context).textTheme.headline6),
           ),
           const Spacer(flex: 2),
-          Expanded(
-              child: Padding(
-            padding: const EdgeInsets.only(top: defaultPadding),
-            child: SearchField(changeState: changeState),
-          )),
+          pageState == 'Home_Page'
+              ? Expanded(
+                  child: Padding(
+                  padding: const EdgeInsets.only(top: defaultPadding),
+                  child: SearchField(changeState: changeState),
+                ))
+              : Container(),
           Padding(
             padding: const EdgeInsets.only(top: defaultPadding),
             child: ProfileCard(),
@@ -87,18 +90,15 @@ class Header extends StatelessWidget {
 }
 
 class ProfileCard extends StatefulWidget {
-  late Function stringTest;
-  /*const ProfileCard({
+  ProfileCard({
     Key? key,
-  }) : super(key: key);*/
+  }) : super(key: key);
 
   @override
   State<ProfileCard> createState() => _ProfileCardState();
 }
 
 class _ProfileCardState extends State<ProfileCard> {
-  var loginText = 'Login';
-  var login = false;
   List<User> users = [];
 
   @override
@@ -109,7 +109,7 @@ class _ProfileCardState extends State<ProfileCard> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   Future<void> showLoginDialog(BuildContext context) async {
-    if (login == false) {
+    if (loginGlobal == false) {
       return await showDialog(
         context: context,
         builder: (context) {
@@ -187,7 +187,7 @@ class _ProfileCardState extends State<ProfileCard> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: Center(child: Text(loginText)),
+            title: Center(child: Text(loginTextGlobal)),
             content: Container(
               margin: const EdgeInsets.only(right: defaultPadding),
               padding: const EdgeInsets.symmetric(
@@ -286,11 +286,17 @@ class _ProfileCardState extends State<ProfileCard> {
         },
         child: Row(
           children: [
-            Image.asset(loginIcon),
+            Icon(
+              Icons.account_circle_outlined,
+              color: Colors.grey,
+              size: 30.0,
+              semanticLabel: 'Text to announce in accessibility modes',
+            ),
+            //Image.asset(loginIcon),
             Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: defaultPadding / 2),
-              child: Text('$loginText'),
+              child: Text(loginTextGlobal),
             )
           ],
         ),
@@ -317,8 +323,8 @@ class _ProfileCardState extends State<ProfileCard> {
       final jsonData = jsonDecode(response.body);
       if (jsonData["password"] == pass) {
         setState(() {
-          loginText = jsonData["username"];
-          login = true;
+          loginTextGlobal = jsonData["username"];
+          loginGlobal = true;
         });
       } else {
         showModalDialog(context, 'Login', 'Usuário ou Senha inválido');
@@ -330,8 +336,8 @@ class _ProfileCardState extends State<ProfileCard> {
 
   logoutUser() {
     setState(() {
-      loginText = 'Login';
-      login = false;
+      loginTextGlobal = 'Login';
+      loginGlobal = false;
     });
   }
 }
@@ -348,7 +354,7 @@ class SearchField extends StatefulWidget {
 }
 
 class _SearchFieldState extends State<SearchField> {
-  final TextEditingController _searchQuery = TextEditingController();
+  TextEditingController _searchQuery = TextEditingController();
   late List<Steam> _list;
   late List<Steam> _searchList;
   final key = GlobalKey<ScaffoldState>();
@@ -393,7 +399,7 @@ class _SearchFieldState extends State<SearchField> {
               widget.changeState(_searchQuery.text);
             },
             child: Container(
-              padding: const EdgeInsets.all(defaultPadding * 0.75),
+              padding: const EdgeInsets.all(defaultPadding * 0.70),
               margin:
                   const EdgeInsets.symmetric(horizontal: defaultPadding / 2),
               decoration: BoxDecoration(
@@ -404,12 +410,21 @@ class _SearchFieldState extends State<SearchField> {
                 onTap: () {
                   widget.changeState(_searchQuery.text);
                 },
-                child: Image.asset(
+                child: Icon(
+                  Icons.search,
+                  color: Colors.white70,
+                  size: 20.0,
+                  semanticLabel: 'Text to announce in accessibility modes',
+                ), /*Image.asset(
                   searchIcon,
-                ),
+                ),*/
               ),
             ),
           )),
+      onSubmitted: (_searchQuery) {
+        widget.changeState(_searchQuery);
+      },
+      textInputAction: TextInputAction.search,
     );
   }
 }

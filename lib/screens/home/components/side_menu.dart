@@ -4,7 +4,11 @@ import 'package:mygamelist/responsive.dart';
 import 'package:mygamelist/screens/homescreen.dart';
 
 class SideMenu extends StatelessWidget {
-  const SideMenu({Key? key}) : super(key: key);
+  final String pageState;
+  SideMenu({
+    Key? key,
+    required this.pageState,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -28,12 +32,14 @@ class SideMenu extends StatelessWidget {
             ),
             DrawListTile(
                 title: "Pagina Inicial",
-                press: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => HomeScreen(),
-                      ),
-                    ),
+                press: pageState == 'Detail_Page'
+                    ? () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => HomeScreen(),
+                          ),
+                        )
+                    : () {},
                 pngSrc: homeIcon),
             //DrawListTile(title: "Login", press: () {}),
           ],

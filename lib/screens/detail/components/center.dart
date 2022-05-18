@@ -7,23 +7,17 @@ import 'package:intl/intl.dart';
 import 'package:mygamelist/config.dart';
 import 'package:mygamelist/model/steam.dart';
 import 'package:mygamelist/responsive.dart';
-import 'package:mygamelist/screens/detail/components/detail_header.dart';
 import 'package:mygamelist/screens/home/components/side_menu.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl_browser.dart';
 
-class CenterPage extends StatelessWidget {
+class CenterPage extends StatefulWidget {
   //var indexGame;
   var nameGame;
   var steamAppid;
   var gogAppid;
-  var gogPrice;
-  var jsonDataGOG;
-  var screenshots = [];
-  var descGame;
-  var genresGame = [];
-  final String imageGame;
-  final String steamPrice;
+  String imageGame;
+  String steamPrice;
   CenterPage(
       {Key? key,
       //required this.indexGame,
@@ -33,11 +27,27 @@ class CenterPage extends StatelessWidget {
       required this.imageGame,
       required this.steamPrice})
       : super(key: key);
+
+  @override
+  State<CenterPage> createState() => _CenterPageState();
+}
+
+class _CenterPageState extends State<CenterPage> {
+  var gogPrice;
+
+  var jsonDataGOG;
+
+  var screenshots;
+
+  var descGame;
+
+  var genresGame;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: FutureBuilder(
-          future: consultarTamanhoSteam(steamAppid, gogAppid),
+          future: consultarTamanhoSteam(),
           builder: (context, AsyncSnapshot snapshot) {
             if (snapshot.data == null) {
               return const Center(
@@ -52,11 +62,11 @@ class CenterPage extends StatelessWidget {
                 return Row(children: [
                   Expanded(
                     child: GameDetailCard(
-                        steamPrice: steamPrice,
-                        imageGame: imageGame,
-                        steamAppid: steamAppid,
+                        steamPrice: widget.steamPrice,
+                        imageGame: widget.imageGame,
+                        steamAppid: widget.steamAppid,
                         gogPrice: gogPrice,
-                        gogAppid: gogAppid,
+                        gogAppid: widget.gogAppid,
                         jsonDataGOG: jsonDataGOG,
                         screenshots: screenshots,
                         descGame: descGame,
@@ -69,19 +79,18 @@ class CenterPage extends StatelessWidget {
     );
   }
 
-  Future<List<Steam>> consultarTamanhoSteam(
-      String steamAppid, String gogAppid) async {
+  Future<List<Steam>> consultarTamanhoSteam() async {
     http.Response responseSteam =
-        await http.get(Uri.parse("$apiSteam$steamAppid&cc=BR"));
+        await http.get(Uri.parse("$apiSteam${widget.steamAppid}&cc=BR"));
     final jsonDataDetail = jsonDecode(responseSteam.body);
     http.Response responseGOGPrice = await http
-        .get(Uri.parse("$apiGOGPrice$gogAppid/prices?countryCode=BR"));
+        .get(Uri.parse("$apiGOGPrice${widget.gogAppid}/prices?countryCode=BR"));
     final jsonDataPriceGOG = jsonDecode(responseGOGPrice.body);
     http.Response responseGOGDetail =
-        await http.get(Uri.parse("$apiGOG$gogAppid"));
+        await http.get(Uri.parse("$apiGOG${widget.gogAppid}"));
     final jsonDataApiGOG = jsonDecode(responseGOGDetail.body);
     jsonDataGOG = jsonDataApiGOG;
-    screenshots = jsonDataDetail["$steamAppid"]["data"]["screenshots"];
+    screenshots = jsonDataDetail["${widget.steamAppid}"]["data"]["screenshots"];
     gogPrice = jsonDataPriceGOG["_embedded"]["prices"][0]["finalPrice"];
     if (gogPrice != null && gogPrice.length > 0) {
       gogPrice = gogPrice.substring(0, gogPrice.length - 4);
@@ -90,48 +99,14 @@ class CenterPage extends StatelessWidget {
     var format = NumberFormat.simpleCurrency(locale: 'pt_BR');
     gogPrice = "${format.currencySymbol}" +
         currencyFormatter.format(int.parse(gogPrice) / 100);
-    var detailGame = jsonDataDetail["$steamAppid"]["data"]["short_description"];
+    var detailGame =
+        jsonDataDetail["${widget.steamAppid}"]["data"]["short_description"];
     descGame = detailGame;
-    var genreGame = jsonDataDetail["$steamAppid"]["data"]["genres"];
+    var genreGame = jsonDataDetail["${widget.steamAppid}"]["data"]["genres"];
     genresGame = genreGame;
-    //print(genresGame[0]["description"]);
-    // Estruturação no nome para uso da API Metacritic
-    /*String nameTest = nameGame;
-    nameTest = nameTest.replaceAll('  ', ' ');
-    nameTest = nameTest.replaceAll(' - ', '-');
-    nameTest = nameTest.replaceAll(':', '');
-    nameTest = nameTest.replaceAll(' ', '-');
-    //print(nameTest.replaceAll(' ', '-'));
-    print(nameTest);*/
-    /*steamPrices.add(jsonDataDetail["$SteamAppid"]["data"]["price_overview"]["final_formatted"]);
-      steamAppids.add(SteamAppid);*/
-    /*Steam steam = Steam(
-        SteamAppid,
-        steamImage,
-        steamPrice,
-      );*/
-    /*setState(() {
-        steamImages.add(steamImage);
-      });*/
     List<Steam> steams = [];
     List<String> steamDetail;
-    /*for (var i in jsonDataApiGOG) {
-      var gogAppid = i["appid"];
-      http.Response responseGOGDetail = await http.get(Uri.parse("$apiGOG$gogAppid"));
-      final jsonDataDetailGOG = jsonDecode(responseGOGDetail.body);
-      //http.Response responseGOGPrice = await http.get(Uri.parse("$apiGOGPrice$gogAppid/prices?countryCode=BR"));
-      //final jsonDataPriceGOG = jsonDecode(responseGOGPrice.body);
-      //print(jsonDataPriceGOG["_embedded"]["prices"][0]["finalPrice"]);
-      //var gogPrice = jsonDataPriceGOG["_embedded"]["prices"][0]["finalPrice"];
-      //gogPrices.add(gogPrice);
-      //print(jsonDataPriceGOG["_embedded"]["prices"]["finalPrice"]);
-    }*/
     return steams;
-    /*setState(() {
-      lenght = jsonData.length;
-      jsonDataSteam = jsonData;
-    });
-    consultaSteam(1);*/
   }
 }
 
@@ -365,6 +340,7 @@ class _VideoDescription extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentWidth = MediaQuery.of(context).size.width;
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 0.0, 0.0, 0.0),
       child: Column(
@@ -382,19 +358,30 @@ class _VideoDescription extends StatelessWidget {
             'Descrição: $user',
             style: const TextStyle(fontSize: 10.0),
           ),
-          const Padding(padding: EdgeInsets.symmetric(vertical: 25.0)),
+          currentWidth >= 810
+              ? const Padding(padding: EdgeInsets.symmetric(vertical: 25.0))
+              : const Padding(padding: EdgeInsets.symmetric(vertical: 15.0)),
           OutlinedButton.icon(
             onPressed: () {
               steamBool == true ? _steamURL(appid) : _gogURL(appid);
             },
-            icon: Padding(
-              padding: const EdgeInsets.only(top: 4, right: 4, bottom: 4),
-              child: Image.asset(
-                icon,
-                width: 35,
-                height: 35,
-              ),
-            ),
+            icon: currentWidth >= 810
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 4, right: 4, bottom: 4),
+                    child: Image.asset(
+                      icon,
+                      width: 35,
+                      height: 35,
+                    ),
+                  )
+                : Padding(
+                    padding: const EdgeInsets.only(top: 4, right: 4, bottom: 4),
+                    child: Image.asset(
+                      icon,
+                      width: 30,
+                      height: 30,
+                    ),
+                  ),
             label: Text(
               "Preço $price",
               style: TextStyle(color: Colors.white),

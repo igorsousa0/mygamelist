@@ -3,10 +3,8 @@ import 'package:mygamelist/Screens/Home/Components/side_menu.dart';
 import 'package:mygamelist/responsive.dart';
 import 'package:mygamelist/screens/center/center_screen.dart';
 
-
-
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  HomeScreen({Key? key}) : super(key: key);
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -19,12 +17,13 @@ class _HomeScreenState extends State<HomeScreen> {
     Size _size = MediaQuery.of(context).size;
     return Scaffold(
         key: _scaffoldKey,
-        drawer: const SideMenu(),
+        drawer: SideMenu(
+          pageState: 'Home_Page',
+        ),
         body: Responsive(
           mobile: SafeArea(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children:  [
+              child:
+                  Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Container(
               margin: const EdgeInsets.only(left: 15, top: 23),
               child: IconButton(
@@ -39,28 +38,29 @@ class _HomeScreenState extends State<HomeScreen> {
               child: CenterScreen(),
             ),
           ])),
-          tablet:  SafeArea(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children:  [
+          tablet: SafeArea(
+              child:
+                  Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Expanded(
               flex: 2,
-              child: SideMenu(),
+              child: SideMenu(
+                pageState: 'Home_Page',
+              ),
             ),
             Expanded(
               flex: 6,
               child: CenterScreen(),
             ),
           ])),
-          desktop: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children:  [
+          desktop: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Expanded(
-          child: SideMenu(),
+              child: SideMenu(
+                pageState: 'Home_Page',
+              ),
             ),
             Expanded(
-          flex: 5,
-          child: CenterScreen(),
+              flex: 5,
+              child: CenterScreen(),
             ),
           ]),
         ));

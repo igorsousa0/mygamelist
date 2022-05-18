@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:mygamelist/user.dart';
 
 //Global Variables
+String loginTextGlobal = 'Login';
+bool loginGlobal = false;
 
 //API
 const String api = 'http://127.0.0.1:8000';
