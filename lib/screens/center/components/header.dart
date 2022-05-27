@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-import 'package:http/http.dart';
 import 'package:mygamelist/config.dart';
 import 'package:mygamelist/model/steam.dart';
 import 'package:mygamelist/responsive.dart';
-import 'package:mygamelist/screens/center/center_screen.dart';
 import 'package:mygamelist/user.dart';
 import 'dart:convert';
 
@@ -22,29 +19,53 @@ class Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
     return Responsive(
-      mobile: Row(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(
-                top: defaultPadding, left: defaultPadding),
-            child: Text(pageText,
-                style: DefaultTextStyle.of(context)
-                    .style
-                    .apply(fontSizeFactor: 1.4)),
-          ),
+      mobile: Row(children: [
+        if (pageState == 'Home_Page') ...[
           const Spacer(flex: 1),
-          Expanded(
-              child: Padding(
-            padding: const EdgeInsets.only(top: defaultPadding),
-            child: SearchField(changeState: changeState),
-          )),
+          if (width < 437) ...[
+            Expanded(
+                flex: 5,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: defaultPadding),
+                  child: SearchField(changeState: changeState),
+                )),
+          ] else ...[
+            Expanded(
+                flex: 4,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: defaultPadding),
+                  child: SearchField(changeState: changeState),
+                )),
+          ],
           Padding(
             padding: const EdgeInsets.only(top: defaultPadding),
-            child: ProfileCard(),
+            child: ProfileCard(pageState: pageState),
           ),
+        ] else ...[
+          if (width <= 355) ...[
+            Padding(
+              padding: const EdgeInsets.only(
+                  top: defaultPadding * 1.7, left: defaultPadding),
+              child:
+                  Text(pageText, style: Theme.of(context).textTheme.headline6),
+            ),
+          ] else ...[
+            Padding(
+              padding: const EdgeInsets.only(
+                  top: defaultPadding, left: defaultPadding),
+              child:
+                  Text(pageText, style: Theme.of(context).textTheme.headline6),
+            ),
+            const Spacer(flex: 1),
+            Padding(
+              padding: const EdgeInsets.only(top: defaultPadding),
+              child: ProfileCard(pageState: pageState),
+            ),
+          ],
         ],
-      ),
+      ]),
       tablet: Row(
         children: [
           Padding(
@@ -53,15 +74,22 @@ class Header extends StatelessWidget {
             child: Text(pageText, style: Theme.of(context).textTheme.headline6),
           ),
           const Spacer(flex: 1),
-          Expanded(
-              child: Padding(
-            padding: const EdgeInsets.only(top: defaultPadding),
-            child: SearchField(changeState: changeState),
-          )),
-          Padding(
-            padding: const EdgeInsets.only(top: defaultPadding),
-            child: ProfileCard(),
-          ),
+          if (pageState == 'Home_Page') ...[
+            Expanded(
+                child: Padding(
+              padding: const EdgeInsets.only(top: defaultPadding),
+              child: SearchField(changeState: changeState),
+            )),
+            Padding(
+              padding: const EdgeInsets.only(top: defaultPadding),
+              child: ProfileCard(pageState: pageState),
+            ),
+          ] else ...[
+            Padding(
+              padding: const EdgeInsets.only(top: defaultPadding),
+              child: ProfileCard(pageState: pageState),
+            ),
+          ]
         ],
       ),
       desktop: Row(
@@ -72,17 +100,22 @@ class Header extends StatelessWidget {
             child: Text(pageText, style: Theme.of(context).textTheme.headline6),
           ),
           const Spacer(flex: 2),
-          pageState == 'Home_Page'
-              ? Expanded(
-                  child: Padding(
-                  padding: const EdgeInsets.only(top: defaultPadding),
-                  child: SearchField(changeState: changeState),
-                ))
-              : Container(),
-          Padding(
-            padding: const EdgeInsets.only(top: defaultPadding),
-            child: ProfileCard(),
-          ),
+          if (pageState == 'Home_Page') ...[
+            Expanded(
+                child: Padding(
+              padding: const EdgeInsets.only(top: defaultPadding),
+              child: SearchField(changeState: changeState),
+            )),
+            Padding(
+              padding: const EdgeInsets.only(top: defaultPadding),
+              child: ProfileCard(pageState: pageState),
+            ),
+          ] else ...[
+            Padding(
+              padding: const EdgeInsets.only(top: defaultPadding),
+              child: ProfileCard(pageState: pageState),
+            ),
+          ]
         ],
       ),
     );
@@ -90,7 +123,9 @@ class Header extends StatelessWidget {
 }
 
 class ProfileCard extends StatefulWidget {
+  String pageState;
   ProfileCard({
+    required this.pageState,
     Key? key,
   }) : super(key: key);
 
@@ -270,6 +305,7 @@ class _ProfileCardState extends State<ProfileCard> {
 
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
     return Container(
       margin: const EdgeInsets.only(left: defaultPadding),
       padding: const EdgeInsets.symmetric(
@@ -292,12 +328,15 @@ class _ProfileCardState extends State<ProfileCard> {
               size: 30.0,
               semanticLabel: 'Text to announce in accessibility modes',
             ),
-            //Image.asset(loginIcon),
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: defaultPadding / 2),
-              child: Text(loginTextGlobal),
-            )
+            if (width < 515 && widget.pageState == 'Home_Page')
+              ...[]
+            else if (width >= 355 && widget.pageState == 'Detail_Page') ...[
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: defaultPadding / 2),
+                child: Text(loginTextGlobal),
+              )
+            ]
           ],
         ),
       ),
@@ -415,9 +454,7 @@ class _SearchFieldState extends State<SearchField> {
                   color: Colors.white70,
                   size: 20.0,
                   semanticLabel: 'Text to announce in accessibility modes',
-                ), /*Image.asset(
-                  searchIcon,
-                ),*/
+                ),
               ),
             ),
           )),

@@ -4,13 +4,12 @@ import 'package:mygamelist/config.dart';
 import 'package:mygamelist/model/steam.dart';
 import 'package:mygamelist/responsive.dart';
 import 'package:mygamelist/screens/detail_screen.dart';
-import 'package:mygamelist/user.dart';
 import 'components/header.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class CenterScreen extends StatefulWidget {
-  CenterScreen({
+  const CenterScreen({
     Key? key,
   }) : super(key: key);
 
@@ -37,23 +36,23 @@ class _CenterScreenState extends State<CenterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: Drawer(),
+      drawer: const Drawer(),
       body: Container(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: EdgeInsets.only(right: defaultPadding),
+              padding: const EdgeInsets.only(right: defaultPadding),
               child: Header(
                   changeState: changeStateSteam,
                   pageState: 'Home_Page',
                   pageText: 'Pagina Inicial'),
             ),
-            //Login(),
-            SizedBox(height: defaultPadding),
+            const SizedBox(height: defaultPadding),
             Expanded(
               child: Contents(
                 steamFilter: steamFilter,
+                changeStateSteam: changeStateSteam,
               ),
             ),
           ],
@@ -65,8 +64,10 @@ class _CenterScreenState extends State<CenterScreen> {
 
 class Contents extends StatefulWidget {
   final String steamFilter;
-  Contents({
+  final Function changeStateSteam;
+  const Contents({
     required this.steamFilter,
+    required this.changeStateSteam,
     Key? key,
   }) : super(key: key);
 
@@ -75,12 +76,10 @@ class Contents extends StatefulWidget {
 }
 
 class _ContentsState extends State<Contents> {
-  static var gogUrls = [];
   static var gogAppids = [];
   @override
   void initState() {
     super.initState();
-    //test = ProfileCard(this.cal)
   }
 
   Future<List<Steam>> consultarDados() async {
@@ -91,23 +90,21 @@ class _ContentsState extends State<Contents> {
     http.Response responseApiGOG = await http.get(Uri.parse("$api/gog/"));
     var jsonDataApiGOG = jsonDecode(responseApiGOG.body);
     List<Steam> steams = [];
-    List<String> steamDetail;
     for (var i in jsonDataApiSteam) {
-      var SteamAppid = i["appid"];
+      var steamAppid = i["appid"];
       http.Response responseSteam =
-          await http.get(Uri.parse("$apiSteam$SteamAppid&cc=BR"));
+          await http.get(Uri.parse("$apiSteam$steamAppid&cc=BR"));
       final jsonDataDetail = jsonDecode(responseSteam.body);
-      var scoreGame = jsonDataDetail["$SteamAppid"]["data"]["metacritic"];
+      var scoreGame = jsonDataDetail["$steamAppid"]["data"]["metacritic"];
 
       if (scoreGame == null) {
         scoreGame = null;
       } else {
         scoreGame =
-            jsonDataDetail["$SteamAppid"]["data"]["metacritic"]["score"];
+            jsonDataDetail["$steamAppid"]["data"]["metacritic"]["score"];
       }
-      String steamPrice = jsonDataDetail["$SteamAppid"]["data"]
+      String steamPrice = jsonDataDetail["$steamAppid"]["data"]
           ["price_overview"]["final_formatted"];
-      final currencyFormatter = NumberFormat('#,##0.00', 'pt_BR');
       var format = NumberFormat.simpleCurrency(locale: 'pt_BR');
       steamPrice = steamPrice.substring(3, steamPrice.length);
       steamPrice = "${format.currencySymbol}" + steamPrice;
@@ -115,7 +112,7 @@ class _ContentsState extends State<Contents> {
       Steam steam = Steam(
         appid: i["appid"],
         name: i["name"],
-        image: jsonDataDetail["$SteamAppid"]["data"]["header_image"],
+        image: jsonDataDetail["$steamAppid"]["data"]["header_image"],
         score: scoreGame,
         price: steamPrice,
       );
@@ -162,14 +159,15 @@ class _ContentsState extends State<Contents> {
                   child: Text('Algum error ocorreu'),
                 );
               } else {
-                return ItemCard(snapshot);
+                return itemCard(snapshot);
               }
             }
           }),
     );
   }
 
-  Widget ItemCard(snapshot) {
+  Widget itemCard(snapshot) {
+    double width = MediaQuery.of(context).size.width;
     return Responsive(
       tablet: Container(
         padding: const EdgeInsets.only(
@@ -217,7 +215,7 @@ class _ContentsState extends State<Contents> {
                             child: ListTile(
                               title: Text(
                                 snapshot.data[index].name,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 15,
                                 ),
@@ -240,12 +238,10 @@ class _ContentsState extends State<Contents> {
                                       ))
                                   : Container(
                                       decoration: BoxDecoration(
-                                          color: Colors
-                                              .blueGrey.shade400 //Colors.blue,
-                                          ),
+                                          color: Colors.blueGrey.shade400),
                                       height: 27,
                                       width: 27,
-                                      child: Center(
+                                      child: const Center(
                                         child: Text('?',
                                             style: TextStyle(
                                                 fontWeight: FontWeight.bold)),
@@ -278,9 +274,8 @@ class _ContentsState extends State<Contents> {
                     controller: ScrollController(),
                     shrinkWrap: true,
                     itemCount: snapshot.data.length,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: width < 515 ? 1 : 2,
                       crossAxisSpacing: defaultPadding * 2,
                       mainAxisSpacing: defaultPadding,
                     ),
@@ -308,7 +303,7 @@ class _ContentsState extends State<Contents> {
                             child: ListTile(
                               title: Text(
                                 snapshot.data[index].name,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 15,
                                 ),
@@ -331,12 +326,10 @@ class _ContentsState extends State<Contents> {
                                       ))
                                   : Container(
                                       decoration: BoxDecoration(
-                                          color: Colors
-                                              .blueGrey.shade400 //Colors.blue,
-                                          ),
+                                          color: Colors.blueGrey.shade400),
                                       height: 27,
                                       width: 27,
-                                      child: Center(
+                                      child: const Center(
                                         child: Text('?',
                                             style: TextStyle(
                                                 fontWeight: FontWeight.bold)),
@@ -399,7 +392,7 @@ class _ContentsState extends State<Contents> {
                             child: ListTile(
                               title: Text(
                                 snapshot.data[index].name,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 15,
                                 ),
@@ -427,7 +420,7 @@ class _ContentsState extends State<Contents> {
                                           ),
                                       height: 27,
                                       width: 27,
-                                      child: Center(
+                                      child: const Center(
                                         child: Text('?',
                                             style: TextStyle(
                                                 fontWeight: FontWeight.bold)),

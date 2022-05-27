@@ -25,11 +25,11 @@ class DetailScreen extends StatelessWidget {
   }) : super(key: key);
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
     return Scaffold(
       key: _scaffoldKey,
       drawer: SideMenu(
         pageState: 'Detail_Page',
-        //loginText: loginText,
       ),
       body: Responsive(
         mobile: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -62,7 +62,7 @@ class DetailScreen extends StatelessWidget {
             ),
           ),
           Expanded(
-            flex: 4,
+            flex: 3,
             child: DetailCenter(
               nameGame: nameGame,
               indexGame: indexGame,

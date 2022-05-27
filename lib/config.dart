@@ -1,15 +1,14 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:mygamelist/user.dart';
 
 //Global Variables
 String loginTextGlobal = 'Login';
 bool loginGlobal = false;
 
 //API
-const String api = 'http://127.0.0.1:8000';
-//const String api = 'https://backend-my-game-list.herokuapp.com';
+//const String api = 'http://127.0.0.1:8000';
+const String api = 'https://backend-my-game-list.herokuapp.com';
 const String apiSteam =
     'https://mycorssite.herokuapp.com/https://store.steampowered.com/api/appdetails?appids=';
 const String apiGOG =

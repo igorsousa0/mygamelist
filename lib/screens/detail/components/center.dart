@@ -238,14 +238,12 @@ class GameDetailCard extends StatelessWidget {
                         itemCount: 4,
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 4,
+                          crossAxisCount: 2,
                           crossAxisSpacing: defaultPadding * 2,
-                          mainAxisSpacing: defaultPadding,
+                          //mainAxisSpacing: defaultPadding * 2,
                         ),
                         itemBuilder: (context, index) => Image.network(
                           screenshots[index]["path_thumbnail"],
-                          height: 150,
-                          width: 150,
                         ),
                       )
                     ],
@@ -346,26 +344,86 @@ class _VideoDescription extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(
-            title,
-            style: const TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 18.0,
+          if (currentWidth >= 578 && currentWidth <= 843) ...[
+            Text(
+              title,
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 18.0,
+              ),
             ),
-          ),
-          const Padding(padding: EdgeInsets.symmetric(vertical: 2.0)),
-          Text(
-            'Descrição: $user',
-            style: const TextStyle(fontSize: 10.0),
-          ),
-          currentWidth >= 810
-              ? const Padding(padding: EdgeInsets.symmetric(vertical: 25.0))
-              : const Padding(padding: EdgeInsets.symmetric(vertical: 15.0)),
+          ] else if (currentWidth < 577) ...[
+            Text(
+              title,
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 18.0,
+              ),
+            ),
+          ] else if (currentWidth >= 844 && currentWidth <= 866) ...[
+            Text(
+              title,
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 18.0,
+              ),
+            ),
+          ] else if (currentWidth >= 867 && currentWidth <= 976) ...[
+            Text(
+              title,
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 18.0,
+              ),
+            ),
+          ] else if (currentWidth >= 976 && currentWidth <= 1096) ...[
+            Text(
+              title,
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 18.0,
+              ),
+            ),
+          ] else if (currentWidth >= 1096 && currentWidth <= 1115) ...[
+            Padding(
+              padding: const EdgeInsets.only(top: 15),
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 18.0,
+                ),
+              ),
+            ),
+          ] else ...[
+            Text(
+              title,
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 18.0,
+              ),
+            ),
+          ],
+          if (currentWidth >= 578 && currentWidth <= 843) ...[
+            const Padding(padding: EdgeInsets.symmetric(vertical: 30.0))
+          ] else if (currentWidth < 577) ...[
+            const Padding(padding: EdgeInsets.symmetric(vertical: 15.0)),
+          ] else if (currentWidth >= 844 && currentWidth <= 866) ...[
+            const Padding(padding: EdgeInsets.symmetric(vertical: 26.0))
+          ] else if (currentWidth >= 867 && currentWidth <= 976) ...[
+            const Padding(padding: EdgeInsets.symmetric(vertical: 55.0))
+          ] else if (currentWidth >= 976 && currentWidth <= 1096) ...[
+            const Padding(padding: EdgeInsets.symmetric(vertical: 70.0))
+          ] else if (currentWidth >= 1096 && currentWidth <= 1115) ...[
+            const Padding(padding: EdgeInsets.symmetric(vertical: 84.0))
+          ] else ...[
+            const Padding(padding: EdgeInsets.symmetric(vertical: 35.0))
+          ],
           OutlinedButton.icon(
             onPressed: () {
               steamBool == true ? _steamURL(appid) : _gogURL(appid);
             },
-            icon: currentWidth >= 810
+            icon: currentWidth >= 578
                 ? Padding(
                     padding: const EdgeInsets.only(top: 4, right: 4, bottom: 4),
                     child: Image.asset(
@@ -378,15 +436,20 @@ class _VideoDescription extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 4, right: 4, bottom: 4),
                     child: Image.asset(
                       icon,
-                      width: 30,
-                      height: 30,
+                      width: 25,
+                      height: 25,
                     ),
                   ),
-            label: Text(
-              "Preço $price",
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
+            label: currentWidth >= 359
+                ? Text(
+                    "Preço $price",
+                    style: TextStyle(color: Colors.white),
+                  )
+                : Text(
+                    "Preço $price",
+                    style: TextStyle(color: Colors.white, fontSize: 8),
+                  ),
+          )
         ],
       ),
     );
@@ -473,7 +536,7 @@ class CustomListItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Expanded(
-              flex: 2,
+              flex: 4,
               child: thumbnail,
             ),
             Expanded(
@@ -557,8 +620,7 @@ class DetailCard extends StatelessWidget {
                     text: 'Descrição: ',
                     style: const TextStyle(fontWeight: FontWeight.bold)),
                 TextSpan(text: descGame),
-              ])) //Text('Descrição :$descGame'),
-              ),
+              ]))),
           Padding(
               padding: const EdgeInsets.all(10.0),
               child: RichText(
